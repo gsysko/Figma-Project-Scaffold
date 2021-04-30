@@ -8,12 +8,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 // Create pages
-let workInProgressPage = figma.createPage();
-let scratchPage = figma.createPage();
+let problemPage = figma.createPage();
+let solutionPage = figma.createPage();
+let specPage = figma.createPage();
+let researchPage = figma.createPage();
+let prototypePage = figma.createPage();
+let archivePage = figma.createPage();
 // Set page names and renames the default "Page 1"
-figma.currentPage.name = "✅ Ready For Development";
-workInProgressPage.name = "🚧 Work In Progress";
-scratchPage.name = "❌ Scratch";
+figma.currentPage.name = "📖 About";
+problemPage.name = "🤔 Problem Space";
+solutionPage.name = "💡 Solution Space";
+specPage.name = "📐 Design Spec";
+researchPage.name = "🔬 Research";
+prototypePage.name = "🕹 Prototype";
+archivePage.name = "📦 Archive";
 // Frame for wrapping the list of page examples.
 let listFrame = figma.createFrame();
 listFrame.name = "Other page examples";
@@ -23,7 +31,7 @@ listFrame.verticalPadding = 16;
 listFrame.horizontalPadding = 16;
 listFrame.itemSpacing = 16;
 listFrame.cornerRadius = 8;
-scratchPage.appendChild(listFrame);
+figma.currentPage.appendChild(listFrame);
 let run = () => __awaiter(this, void 0, void 0, function* () {
     // Need to load a font here to generate the other page examples.
     yield figma.loadFontAsync({ family: "Inter", style: "Regular" });
@@ -32,7 +40,7 @@ let run = () => __awaiter(this, void 0, void 0, function* () {
     // However in order to make adding one of these pages easily, we add some
     // text to our scratch page so we can copy/paste them with the proper emoji.
     yield createAdditionalPageExample("🚢 Shipped");
-    yield createAdditionalPageExample("🕹 Prototype");
+    yield createAdditionalPageExample("💅🏽 Styles");
     yield createAdditionalPageExample("⚙️ Components");
     yield createAdditionalPageExample("👀 Ready for Review");
     figma.notify("Project Scafolding Done 👍");

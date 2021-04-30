@@ -1,12 +1,20 @@
 
 // Create pages
-let workInProgressPage = figma.createPage();
-let scratchPage = figma.createPage();
+let problemPage = figma.createPage();
+let solutionPage = figma.createPage();
+let specPage = figma.createPage();
+let researchPage = figma.createPage();
+let prototypePage = figma.createPage();
+let archivePage = figma.createPage();
 
 // Set page names and renames the default "Page 1"
-figma.currentPage.name = "✅ Ready For Development";
-workInProgressPage.name = "🚧 Work In Progress";
-scratchPage.name = "❌ Scratch";
+figma.currentPage.name = "📖 About";
+problemPage.name = "🤔 Problem Space";
+solutionPage.name = "💡 Solution Space";
+specPage.name = "📐 Design Spec";
+researchPage.name = "🔬 Research";
+prototypePage.name = "🕹 Prototype";
+archivePage.name = "📦 Archive";
 
 // Frame for wrapping the list of page examples.
 let listFrame = figma.createFrame();
@@ -17,7 +25,7 @@ listFrame.verticalPadding = 16;
 listFrame.horizontalPadding = 16;
 listFrame.itemSpacing = 16;
 listFrame.cornerRadius = 8;
-scratchPage.appendChild(listFrame);
+figma.currentPage.appendChild(listFrame);
 
 let run = async () => {
 
@@ -29,7 +37,7 @@ let run = async () => {
   // However in order to make adding one of these pages easily, we add some
   // text to our scratch page so we can copy/paste them with the proper emoji.
   await createAdditionalPageExample("🚢 Shipped");
-  await createAdditionalPageExample("🕹 Prototype");
+  await createAdditionalPageExample("💅🏽 Styles");
   await createAdditionalPageExample("⚙️ Components");
   await createAdditionalPageExample("👀 Ready for Review");
 
