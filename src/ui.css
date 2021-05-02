@@ -1,0 +1,24 @@
+form {
+  width: 100%;
+  font-family: sans-serif;
+}
+
+form * {
+  display:block;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+form label {
+  font-size: small;
+  margin-top: 8px;
+  opacity: 0.64;
+}
+
+form input, select {
+  padding: 8px;
+}
+
+form input:last-child {
+  margin-top: 8px;
+}
