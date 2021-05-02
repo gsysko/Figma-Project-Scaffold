@@ -38,7 +38,7 @@ let run = () => __awaiter(this, void 0, void 0, function* () {
     yield figma.loadFontAsync({ family: "Inter", style: "Regular" });
     yield figma.loadFontAsync({ family: "Inter", style: "Bold" });
     //Add a thumnail to the first page.
-    yield createThumbnail("Example project");
+    yield createThumbnail("Example project", "Product");
     // Not all projects need a prototype, shipped it/released, or research page.
     // However in order to make adding one of these pages easily, we add some
     // text to our scratch page so we can copy/paste them with the proper emoji.
@@ -57,19 +57,23 @@ let createAdditionalPageExample = (text) => {
     listFrame.appendChild(linkLabel);
 };
 // This function adds a thumbnail to your first page.
-let createThumbnail = (text) => {
+let createThumbnail = (title, type) => {
     figma.importComponentByKeyAsync("ac0b158c37de3fa8ba94d2b3801913aea262ffcb").catch(reason => {
         figma.notify("Annotation Kit library is required for thumbnails.");
         figma.closePlugin();
     }).then(component => {
         if (component) {
+            let thumbnail = component.createInstance();
             figma.loadFontAsync({ family: "Sharp Sans No1", style: "Bold" }).then(() => {
-                let thumbnail = component.createInstance();
                 let label = thumbnail.findOne(node => node.name == "File Name");
-                label.characters = text;
-                figma.currentPage.appendChild(thumbnail);
-                figma.closePlugin();
+                label.characters = title;
             });
+            figma.loadFontAsync({ family: "Proxima Nova", style: "Regular" }).then(() => {
+                let badge = thumbnail.findOne(node => node.name == "Badge" && node.type == "TEXT");
+                badge.characters = type;
+            });
+            figma.currentPage.appendChild(thumbnail);
+            figma.closePlugin();
         }
     });
 };
