@@ -1,1 +1,15 @@
-<div id="react-page"></div>
+<form id="form">
+    <div class="c-text">
+        <label class="c-txt__label" for="title-input">Project title</label>
+        <input class="c-txt__input" type="text" title="Project name" id="title-input" placeholder="E.g. Agent Workspace"/>
+    </div>
+    <div class="c-text">
+        <label class="c-txt__label" for="type-select">Project type</label>
+        <select class="c-txt__input c-txt__input--select" name="types" id="type-select">
+            <option value="Product">Product</option>
+            <option value="Library">Library</option>
+            <option value="Exploration">Exploration</option>
+        </select>
+    </div>
+    <input class="c-btn c-btn--primary"  type="submit" title="Create project"/>
+</form>

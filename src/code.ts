@@ -41,7 +41,7 @@ async function createProject(title, type) {
 
   // Frame for wrapping the list of page examples.
   let listFrame = figma.createFrame();
-  listFrame.name = "Other page examples";
+  listFrame.name = "You can add other pages, like these...";
   listFrame.y = 340
   listFrame.resizeWithoutConstraints(640, 1)
   listFrame.layoutMode = "VERTICAL";
@@ -88,7 +88,11 @@ async function createProject(title, type) {
         let thumbnail = component.createInstance()
         await figma.loadFontAsync({family: "Sharp Sans No1", style: "Bold"}).then(() => {
           let label = thumbnail.findOne(node => node.name == "File Name") as TextNode
-          label.characters = title
+          if (title !== ""){
+            label.characters = title
+          } else {
+            label.characters = "Enter title here"
+          }
         })
         await figma.loadFontAsync({family: "Proxima Nova", style: "Regular"}).then(() => {
           let badge = thumbnail.findOne(node => node.name == "Badge" && node.type == "TEXT") as TextNode
