@@ -1,0 +1,16 @@
+@import '../node_modules/@zendeskgarden/css-forms';
+@import '../node_modules/@zendeskgarden/css-buttons';
+
+form {
+  width: 100%;
+  font-family: sans-serif;
+}
+
+form > * {
+  margin-top: 8px;
+}
+
+form > input:last-child {
+  margin-top: 20px;
+  width: 100%;
+}
