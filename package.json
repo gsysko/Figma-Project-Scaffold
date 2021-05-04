@@ -10,6 +10,8 @@
   "license": "",
   "devDependencies": {
     "@figma/plugin-typings": "^1.22.0",
+    "@types/react": "^17.0.4",
+    "@types/react-dom": "^17.0.3",
     "css-loader": "^3.1.0",
     "html-webpack-inline-source-plugin": "0.0.10",
     "html-webpack-plugin": "^3.2.0",
@@ -19,5 +21,29 @@
     "url-loader": "^2.1.0",
     "webpack": "^4.38.0",
     "webpack-cli": "^3.3.6"
+  },
+  "dependencies": {
+    "@zendeskgarden/css-bedrock": "^8.0.0",
+    "@zendeskgarden/css-variables": "^6.4.3",
+    "@zendeskgarden/react-accordions": "^8.0.0",
+    "@zendeskgarden/react-avatars": "^8.0.0",
+    "@zendeskgarden/react-buttons": "^8.0.0",
+    "@zendeskgarden/react-chrome": "^8.0.0",
+    "@zendeskgarden/react-dropdowns": "^8.0.0",
+    "@zendeskgarden/react-forms": "^8.36.2",
+    "@zendeskgarden/react-grid": "^8.0.0",
+    "@zendeskgarden/react-loaders": "^8.0.0",
+    "@zendeskgarden/react-modals": "^8.0.0",
+    "@zendeskgarden/react-notifications": "^8.0.0",
+    "@zendeskgarden/react-pagination": "^8.0.0",
+    "@zendeskgarden/react-tables": "^8.0.0",
+    "@zendeskgarden/react-tabs": "^8.0.0",
+    "@zendeskgarden/react-theming": "^8.36.2",
+    "@zendeskgarden/react-typography": "^8.0.0",
+    "@zendeskgarden/svg-icons": "^6.10.0",
+    "lodash.debounce": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "styled-components": "latest"
   }
 }
