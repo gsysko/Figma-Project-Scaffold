@@ -1,5 +1,5 @@
 {
-  "name": "1. Start here",
+  "name": "Ztart here",
   "version": "1.0.0",
   "description": "Run this plugin when starting a new document. It will auto-generate a set of recommended pages that you can edit/delete/add to.",
   "main": "code.js",
@@ -9,7 +9,7 @@
   "author": "",
   "license": "",
   "devDependencies": {
-    "@figma/plugin-typings": "^1.22.0",
+    "@figma/plugin-typings": "^1.23.0",
     "@types/react": "^17.0.4",
     "@types/react-dom": "^17.0.3",
     "css-loader": "^3.1.0",
