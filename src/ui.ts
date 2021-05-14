@@ -14,8 +14,8 @@ onmessage = (event) => {
 }
 
 function createProject() {
-  debugger
   const title = document.getElementById("title-input") as HTMLInputElement;
   const type = document.getElementById("type-select") as HTMLSelectElement;
-  parent.postMessage({ pluginMessage: { type: 'create-projct', projectTitle: title.value, projectType: type.value } }, '*');
+  const description = document.getElementById("desc-area") as HTMLTextAreaElement;
+  parent.postMessage({ pluginMessage: { type: 'create-projct', projectTitle: title.value, projectType: type.value, projectDescription: description.value } }, '*');
 }
