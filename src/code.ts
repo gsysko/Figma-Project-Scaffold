@@ -47,75 +47,75 @@ async function createProject(title, type, description) {
   await figma.loadFontAsync(FONT_BODIES)
 
   //Add a thumnail to the first page.
-  await createThumbnail(title, type)
+  await createThumbnail(title, type).then(() => {
+    // Frame for project details.
+    detailsFrame = figma.createFrame()
+    detailsFrame.name = "Project details"
+    detailsFrame.y = 340
+    detailsFrame.resizeWithoutConstraints(640, 1)
+    detailsFrame.layoutMode = "VERTICAL"
+    detailsFrame.counterAxisSizingMode = "FIXED"
+    detailsFrame.verticalPadding = PADDING_V
+    detailsFrame.horizontalPadding = PADDING_H
+    detailsFrame.itemSpacing = SPACING
+    figma.currentPage.appendChild(detailsFrame)
 
-  // Frame for project details.
-  detailsFrame = figma.createFrame()
-  detailsFrame.name = "Project details"
-  detailsFrame.y = 340
-  detailsFrame.resizeWithoutConstraints(640, 1)
-  detailsFrame.layoutMode = "VERTICAL"
-  detailsFrame.counterAxisSizingMode = "FIXED"
-  detailsFrame.verticalPadding = PADDING_V
-  detailsFrame.horizontalPadding = PADDING_H
-  detailsFrame.itemSpacing = SPACING
-  figma.currentPage.appendChild(detailsFrame)
+    createDetail("Description", description !== "" ? description : "<Enter a description here>")
+    createDetail("External Links", "<E.g. Confluence> →\n<E.g. Google Doc> →\n<Add links here> →")
+    createDetail("Slack Channels", "#<channel name here>\n#<channel name here>")
+    createDetail("Points of Contact", "Design - <link Slack profile here>\nProduct - <link Slack profile here>\nEngineering - <link Slack profile here>")
 
-  await createDetail("Description", description !== "" ? description : "<Enter a description here>")
-  await createDetail("External Links", "<Add links here> →\n<Add links here> →\n<Add links here> →")
-  await createDetail("Slack Channels", "#<channel name here>\n#<channel name here>")
-  await createDetail("Points of Contact", "Design - <link Slack profile here>\nProduct - <link Slack profile here>\nEngineering - <link Slack here>")
+    // Frame for wrapping the list of page examples.
+    listFrame = figma.createFrame()
+    listFrame.name = "Add other pages, as needed..."
+    listFrame.y = detailsFrame.y + detailsFrame.height + SPACING
+    listFrame.resizeWithoutConstraints(640, 1)
+    listFrame.layoutMode = "VERTICAL"
+    listFrame.counterAxisSizingMode = "FIXED"
+    listFrame.verticalPadding = PADDING_V
+    listFrame.horizontalPadding = PADDING_H
+    listFrame.itemSpacing = 8
+    figma.currentPage.appendChild(listFrame)
 
-  // Frame for wrapping the list of page examples.
-  listFrame = figma.createFrame()
-  listFrame.name = "Add other pages, as needed..."
-  listFrame.y = detailsFrame.y + detailsFrame.height + SPACING
-  listFrame.resizeWithoutConstraints(640, 1)
-  listFrame.layoutMode = "VERTICAL"
-  listFrame.counterAxisSizingMode = "FIXED"
-  listFrame.verticalPadding = PADDING_V
-  listFrame.horizontalPadding = PADDING_H
-  listFrame.itemSpacing = 8
-  figma.currentPage.appendChild(listFrame)
+    // Not all projects need a prototype, shipped it/released, or research page.
+    // However in order to make adding one of these pages easily, we add some
+    // text to our scratch page so we can copy/paste them with the proper emoji.
+    createPageExample("💅🏽 Styles")
+    createPageExample("⚙️ Components")
+    createPageExample("👀 Ready for Review")
 
-  // Not all projects need a prototype, shipped it/released, or research page.
-  // However in order to make adding one of these pages easily, we add some
-  // text to our scratch page so we can copy/paste them with the proper emoji.
-  await createPageExample("🚢 Shipped")
-  await createPageExample("💅🏽 Styles")
-  await createPageExample("⚙️ Components")
-  await createPageExample("👀 Ready for Review")
-
-  figma.closePlugin()
+    figma.closePlugin()
+  })
 }
 
 // This function adds a thumbnail to your first page.
-function createThumbnail(title: string, type: string) {
-  figma.importComponentByKeyAsync("ac0b158c37de3fa8ba94d2b3801913aea262ffcb").catch(reason => {
+async function createThumbnail(title: string, type: string) {
+  await figma.importComponentByKeyAsync("ac0b158c37de3fa8ba94d2b3801913aea262ffcb").catch(reason => {
     figma.notify("Annotation Kit library is required for thumbnails.")
     figma.closePlugin()
-  }).then(async component => {
+  }).then(component => {
     let thumbnailFrame = figma.createFrame()
     thumbnailFrame.name = "Thumbnail - Right click to \"Set as thumbnail\""
     thumbnailFrame.resizeWithoutConstraints(640, 320)
 
     if (component) {
       let thumbnail = component.createInstance()
+      thumbnailFrame.appendChild(thumbnail)
+      figma.currentPage.appendChild(thumbnailFrame)
+
       let label = thumbnail.findOne(node => node.name == "File Name") as TextNode
-      await figma.loadFontAsync(label.fontName as FontName).then(() => {
+      figma.loadFontAsync(label.fontName as FontName).then(() => {
         if (title !== ""){
           label.characters = title
         } else {
           label.characters = "Enter title here"
         }
       })
+
       let badge = thumbnail.findOne(node => node.name == "Badge" && node.type == "TEXT") as TextNode
-      await figma.loadFontAsync(badge.fontName as FontName).then(() => {
+      figma.loadFontAsync(badge.fontName as FontName).then(() => {
         badge.characters = type
       })
-      thumbnailFrame.appendChild(thumbnailFrame)
-
-      figma.currentPage.appendChild(thumbnailFrame)
     }
   })
 }
