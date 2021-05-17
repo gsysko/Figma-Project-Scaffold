@@ -93,7 +93,7 @@ async function createThumbnail(title: string, type: string) {
   await figma.importComponentByKeyAsync("ac0b158c37de3fa8ba94d2b3801913aea262ffcb").catch(reason => {
     figma.notify("Annotation Kit library is required for thumbnails.")
     figma.closePlugin()
-  }).then(component => {
+  }).then(async component => {
     let thumbnailFrame = figma.createFrame()
     thumbnailFrame.name = "Thumbnail - Right click to \"Set as thumbnail\""
     thumbnailFrame.resizeWithoutConstraints(640, 320)
@@ -104,7 +104,7 @@ async function createThumbnail(title: string, type: string) {
       figma.currentPage.appendChild(thumbnailFrame)
 
       let label = thumbnail.findOne(node => node.name == "File Name") as TextNode
-      figma.loadFontAsync(label.fontName as FontName).then(() => {
+      await figma.loadFontAsync(label.fontName as FontName).then(() => {
         if (title !== ""){
           label.characters = title
         } else {
@@ -113,7 +113,7 @@ async function createThumbnail(title: string, type: string) {
       })
 
       let badge = thumbnail.findOne(node => node.name == "Badge" && node.type == "TEXT") as TextNode
-      figma.loadFontAsync(badge.fontName as FontName).then(() => {
+      await figma.loadFontAsync(badge.fontName as FontName).then(() => {
         badge.characters = type
       })
     }
