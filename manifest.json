@@ -1,7 +1,10 @@
 {
-  "name": "Ztart here",
+  "name": "Ztart",
   "id": "969955251383800980",
   "api": "1.0.0",
   "main": "dist/code.js",
-  "ui": "dist/ui.html"
+  "ui": "dist/ui.html",
+  "relaunchButtons": [
+    {"name": "About Zstart", "command": "about"}
+  ]
 }

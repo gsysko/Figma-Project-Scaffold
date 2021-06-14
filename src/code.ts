@@ -12,14 +12,21 @@ var detailsFrame: FrameNode
 figma.showUI(__html__)
 figma.ui.resize(400, 400)
 
+if(figma.root.getPluginData("status") == "run") {
+  //TODO evaluate if there is some way to reconfigure the pages after initial setup.
+  figma.ui.resize(400, 136)
+  figma.ui.postMessage("about")
+}
+
 // Calls to "parent.postMessage" from within the HTML page will trigger this
 // callback. The callback will be passed the "pluginMessage" property of the
 // posted message.
 figma.ui.onmessage = async msg => {
-
   switch (msg.type) {
     case "create-projct":
       await createProject(msg.projectTitle, msg.projectType, msg.projectDescription)
+      figma.root.setRelaunchData({about: "This document was formated with Ztart"})
+      figma.root.setPluginData("status", "run")
       break
   }
 }
@@ -29,18 +36,45 @@ const PADDING_V = 40
 const SPACING = 24
 const FONT_TITLES = { family: "Menlo", style: "Regular" }
 const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
+
 async function createProject(title, type, description) {
   // Set page names and renames the default "Page 1"
   figma.currentPage.name = "📖 About"
-  createPage("🤔 Problem Space")
-  createPage("💡 Solution Space")
-  createPage("📐 Design Specs")
-  createPage("         - Backlog")
-  createPage("         - In development")
-  createPage("         - Shipped")
-  createPage("🔬 Research")
-  createPage("🕹 Prototype")
-  createPage("📦 Archive")
+  switch (type) {
+    case "Exploration": 
+      createPage("🤔 Problem definition")
+      createPage("🔬 Research")
+      createPage("🏝 Explorations")
+      createPage("         ↪ Solution A")
+      createPage("         ↪ Solution B")
+      break;
+    case "Product":
+      createPage("................................................................................................")
+      createPage("📐 Design Specs")
+      createPage("         ↪ Ready for dev")
+      createPage("         ↪ Shipped")
+      createPage("................................................................................................")
+      createPage("🕹 Prototypes")
+      createPage("         ↪ Prototype A")
+      createPage("................................................................................................")
+      createPage("🏝 Explorations")
+      createPage("         ↪ Exploration A")
+      createPage("................................................................................................")
+      createPage("📦 Archives")
+      createPage("         ↪ Archive A")
+      break;
+    case "Library":
+      createPage("❓ How to...")
+      createPage("         ↪ Use this library")
+      createPage("         ↪ Contribute")
+      createPage("................................................................................................")
+      createPage("Component A")
+      createPage("Component B")
+      createPage("Component C")
+      createPage("................................................................................................")
+      createPage("🚧 Component template")
+      break;
+  }
 
   // Need to load a font here to generate the other page examples.
   await figma.loadFontAsync(FONT_TITLES)
@@ -61,7 +95,7 @@ async function createProject(title, type, description) {
     figma.currentPage.appendChild(detailsFrame)
 
     createDetail("Description", description !== "" ? description : "<Enter a description here>")
-    createDetail("External Links", "<E.g. Confluence> →\n<E.g. Google Doc> →\n<Add links here> →")
+    createDetail("External Links", "<Add links here> →\n<E.g. Confluence> →\n<E.g. Google Doc> →")
     createDetail("Slack Channels", "#<channel name here>\n#<channel name here>")
     createDetail("Points of Contact", "Design - <link Slack profile here>\nProduct - <link Slack profile here>\nEngineering - <link Slack profile here>")
 
@@ -112,10 +146,17 @@ async function createThumbnail(title: string, type: string) {
         }
       })
 
-      let badge = thumbnail.findOne(node => node.name == "Badge" && node.type == "TEXT") as TextNode
-      await figma.loadFontAsync(badge.fontName as FontName).then(() => {
-        badge.characters = type
+      let badge = thumbnail.findOne(node => node.name == "Badge" && node.type == "INSTANCE") as InstanceNode
+      let badgeText = badge.findOne(node => node.name == "Badge" && node.type == "TEXT") as TextNode
+      await figma.loadFontAsync(badgeText.fontName as FontName).then(() => {
+        badgeText.characters = type
       })
+      if (type == "Exploration") {
+        badge.fillStyleId = (await figma.importStyleByKeyAsync("0ee1c479d3f21d475227a4520cb481bd98af5af5")).id
+      } else if (type == "Library") {
+        badge.fillStyleId = (await figma.importStyleByKeyAsync("a3aa8c64d10a0b1ee92b3dc6e5f278ac978c56cf")).id
+        badgeText.fillStyleId = (await figma.importStyleByKeyAsync("492c9645d67f026dd37c301c61577504bd7d8ad7")).id
+      }
     }
   })
 }
