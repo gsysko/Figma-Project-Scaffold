@@ -215,31 +215,11 @@ function createPageExample(text: string) {
 
 async function createHowTo(targets) {
   let howPage = figma.root.children.find(node => node.name == "❓ How to...")
+  figma.currentPage = howPage
 
-  let frame = figma.createFrame()
-  frame.name = "How to..."
-  frame.resize(1920, 1080)
-  let tableOfContents = (await figma.importComponentByKeyAsync(TEMPLATE_CONTENTS)).createInstance()
-  frame.insertChild(0, tableOfContents)
-
-  let title = tableOfContents.findChild(node => node.name == "Table of contents") as TextNode
-  await figma.loadFontAsync(title.fontName as FontName)
-  title.characters = "How to..."
-
-  let sections = tableOfContents.findChild(node => node.name == "Sections") as FrameNode
-  sections.children.forEach(node => node.visible = false)
-  let section1 = sections.children[0] as TextNode
-  section1.visible = true
-  await figma.loadFontAsync(section1.fontName as FontName)
-  section1.characters = "Use this library"
-  section1.hyperlink = {type: "NODE", value: targets[0].id}
-  let section2 = sections.children[1] as TextNode
-  section2.visible = true
-  await figma.loadFontAsync(section2.fontName as FontName)
-  section2.characters = "Contribute"
-  section2.hyperlink = {type: "NODE", value: targets[1].id}
-
-  howPage.insertChild(0, frame)
+  let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "How to...", "")
+  await addContent(frame1, "Use this library", targets[0])
+  await addContent(frame1, "Contribute", targets[1])
 }
 
 
@@ -248,10 +228,10 @@ async function createUse() {
 
   figma.currentPage = usePage
 
-  let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "Using this library")
-  await createSlideFrame(TEMPLATE_INFO, "Contributing")
-  await createSlideFrame(TEMPLATE_BLOCKS, "Contributing")
-  await createSlideFrame(TEMPLATE_INFO, "Contributing")
+  let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "Using this library", "", "1. Add sections here\n\nOptionally, add more sections to help describe the usage of your library.")
+  await addContent(frame1, "Purpose", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Purpose", "2. Describe the purpose\n\nThis library was created to fill a need. Describe that need and let designers what does (and doesn’t) fit within this library.\n\nYou can also add an image to the right that represents your library."))
+  await addContent(frame1, "Principles", await createSlideFrame(TEMPLATE_BLOCKS, "Contributing", "Principles", "3. Add your own principles\n\nPrinciples keep foundational decisions consistent, and set precedent for how each component is used and built."))
+  await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Instructions", "4. Add step-by-step instructions\n\nInclude instructions of where the assets can be found, how they are organized, how variants and overrides work, and any other details needed to use the library."))
 
   return frame1
 }
@@ -261,33 +241,83 @@ async function createContribute() {
 
   figma.currentPage = contributePage
 
-  let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "Contributing")
-  await createSlideFrame(TEMPLATE_BLOCKS, "Contributing")
-  await createSlideFrame(TEMPLATE_INFO, "Contributing")
-  await createSlideFrame(TEMPLATE_INFO, "Contributing")
+  let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "Contributing", "", "1. Add sections here\n\nOptionally, add more sections to help describe how other designers can add to this library.")
+  await addContent(frame1, "Conventions", await createSlideFrame(TEMPLATE_BLOCKS, "Contributing", "Conventions", "2. Add your own conventions\n\nWhat conventions does a designer need to be aware of to make components that work in a similar way to all the rest?"))
+  await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Instructions", "3. Add step-by-step instructions\n\nInclude instructions on how to start a branch, organize pages, and request review."))
+  await addContent(frame1, "Checklist", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Checklist", "4. Build a checklist\n\nWhat considerations do you go through before deciding if a component is ready to “go live”? These may refer back to your conventions."))
 
   return frame1
 }
 
-async function createSlideFrame(id, titleText) {
-  debugger
+//TODO Implement an interface so title can be ommited.
+async function createSlideFrame(id: string, supertitleText: string, titleText?: string, instructionText?: string) {
   let pageContents = figma.currentPage.children
   let lastAdded = pageContents[pageContents.length-1]
   let frame1 = figma.createFrame()
-  frame1.name = titleText
+  frame1.name = supertitleText
   frame1.resize(1920, 1080)
   frame1.y = lastAdded ? lastAdded!.y + 1180 : 0
 
   let format = (await figma.importComponentByKeyAsync(id)).createInstance()
   frame1.insertChild(0, format)
+  let supertitle: TextNode
+  let title: TextNode
 
-  let title = format.findOne(node => node.type == "TEXT" && node.name == "Table of contents") as TextNode
-  if(title) {
-    await figma.loadFontAsync(title.fontName as FontName)
-    title.characters = titleText
+  switch(id) {
+    case TEMPLATE_CONTENTS:
+      supertitle = format.findOne(node => node.type == "TEXT" && node.name == "Table of contents") as TextNode
+      if(supertitle) {
+        await setText(supertitle, supertitleText)
+      }
+
+      let sections = format.findChild(node => node.name == "Sections") as FrameNode
+      sections.children.forEach(node => node.visible = false)
+      break;
+    case TEMPLATE_BLOCKS:
+      supertitle = format.findOne(node => node.type == "TEXT" && node.name == "Supertitle") as TextNode
+      if(supertitle) {
+        await setText(supertitle, supertitleText.toUpperCase())
+      }
+      title = format.findOne(node => node.type == "TEXT" && node.characters == "What else does it solve?") as TextNode
+      if (title && titleText) {
+        await setText(title, titleText)
+      }
+      break;
+    case TEMPLATE_INFO:
+      supertitle = format.findOne(node => node.type == "TEXT" && node.name == "Heading" && node.characters == "SUPERTITLE") as TextNode
+      if(supertitle) {
+        await setText(supertitle, supertitleText.toUpperCase())
+      }
+      title = format.findOne(node => node.type == "TEXT" && node.characters == "Heading") as TextNode
+      if (title && titleText) {
+        await setText(title, titleText)
+      }
+      break;
   }
 
   figma.currentPage.insertChild(figma.currentPage.children.length, frame1)
-  
+
+  if (instructionText){
+    let stickie = await (await figma.importComponentByKeyAsync("d4df8b884dbe7ac182612b61cb2091b9244bdf67")).createInstance()
+    stickie.y = frame1.y
+    stickie.x = frame1.x - 40 - 272
+    let note = stickie.findChild(node => node.name === "Note") as TextNode
+    await setText(note, instructionText)
+    figma.currentPage.insertChild(figma.currentPage.children.length, stickie)
+  }
   return frame1
 }
+
+async function addContent(tableFrame: FrameNode, title: string, target: FrameNode) {
+  let table: InstanceNode = tableFrame.children[0] as InstanceNode
+  let sections = table.findChild(node => node.name == "Sections") as FrameNode
+  let section = sections.children.find(node => node.visible == false) as TextNode
+  await setText(section, title)
+  section.hyperlink = {type: "NODE", value: target.id}
+  section.visible = true
+}
+async function setText(node: TextNode, text: string) {
+  await figma.loadFontAsync(node.fontName as FontName)
+  node.characters = text
+}
+
