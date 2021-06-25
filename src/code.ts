@@ -232,9 +232,9 @@ async function createUse() {
   figma.currentPage = usePage
 
   let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "Using this library", "", "1. Add sections here\n\nOptionally, add more sections to help describe the usage of your library.")
-  await addContent(frame1, "Purpose", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Purpose", "2. Describe the purpose\n\nThis library was created to fill a need. Describe that need and let designers what does (and doesn’t) fit within this library.\n\nYou can also add an image to the right that represents your library."))
+  await addContent(frame1, "Purpose", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Purpose", "2. Describe the purpose\n\nThis library was created to fill a need. Describe that need and let designers what does (and doesn’t) fit within this library.\n\nYou can also add an image to the right that represents your library.", "E.g. The Conversation Kit is a Figma library - and set of accompanying tools - that give designers everything they need to design a consistent conversational experience across any number of products and platforms."))
   await addContent(frame1, "Principles", await createSlideFrame(TEMPLATE_BLOCKS, "Contributing", "Principles", "3. Add your own principles\n\nPrinciples keep foundational decisions consistent, and set precedent for how each component is used and built."))
-  await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Instructions", "4. Add step-by-step instructions\n\nInclude instructions of where the assets can be found, how they are organized, how variants and overrides work, and any other details needed to use the library."))
+  await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Instructions", "4. Add step-by-step instructions\n\nInclude instructions of where the assets can be found, how they are organized, how variants and overrides work, and any other details needed to use the library.", "1. Do this\n2. Do that\n3. Profit"))
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 
   return frame1
@@ -247,15 +247,15 @@ async function createContribute() {
 
   let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "Contributing", "", "1. Add sections here\n\nOptionally, add more sections to help describe how other designers can add to this library.")
   await addContent(frame1, "Conventions", await createSlideFrame(TEMPLATE_BLOCKS, "Contributing", "Conventions", "2. Add your own conventions\n\nWhat conventions does a designer need to be aware of to make components that work in a similar way to all the rest?"))
-  await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Instructions", "3. Add step-by-step instructions\n\nInclude instructions on how to start a branch, organize pages, and request review."))
-  await addContent(frame1, "Checklist", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Checklist", "4. Build a checklist\n\nWhat considerations do you go through before deciding if a component is ready to “go live”? These may refer back to your conventions."))
+  await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Instructions", "3. Add step-by-step instructions\n\nInclude instructions on how to start a branch, organize pages, and request review.", "Create a Branch: Press the chevron next to the file name in the toolbar, and select Create branch.... Give it a name in the following format ➕<Component name>.\n\nDuplicate the ‘🚧 Component template’ page, and rename it according to the page naming converntions.\n\nPerform your explorations/work on this page.\n\nComplete the pre-publish checklist.\n\nRequest review by sharing the branch with <team slack channel or point-of-contact>"))
+  await addContent(frame1, "Checklist", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Checklist", "4. Build a checklist\n\nWhat considerations do you go through before deciding if a component is ready to “go live”? These may refer back to your conventions.", "Did you do this?\nDid you do that?\nWhat about the other thing?"))
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 
   return frame1
 }
 
 //TODO Implement an interface so title can be ommited.
-async function createSlideFrame(id: string, supertitleText: string, titleText?: string, instructionText?: string) {
+async function createSlideFrame(id: string, supertitleText: string, titleText?: string, instructionText?: string, contentText?: string) {
   let pageContents = figma.currentPage.children
   let lastAdded = pageContents[pageContents.length-1]
   let frame1 = figma.createFrame()
@@ -267,6 +267,7 @@ async function createSlideFrame(id: string, supertitleText: string, titleText?: 
   frame1.insertChild(0, format)
   let supertitle: TextNode
   let title: TextNode
+  let content: TextNode
 
   switch(id) {
     case TEMPLATE_CONTENTS:
@@ -296,6 +297,10 @@ async function createSlideFrame(id: string, supertitleText: string, titleText?: 
       title = format.findOne(node => node.type == "TEXT" && node.characters == "Heading") as TextNode
       if (title && titleText) {
         await setText(title, titleText)
+      }
+      content = format.findOne(node => node.type == "TEXT" && node.name == "Content") as TextNode
+      if (content && contentText){
+        await setText(content, contentText)
       }
       break;
   }
