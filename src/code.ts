@@ -131,6 +131,7 @@ function createProjectDetails(description) {
   createPageExample("💅🏽 Styles")
   createPageExample("⚙️ Components")
   createPageExample("👀 Ready for Review")
+  figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 }
 
 // This function adds a thumbnail to your first page.
@@ -220,6 +221,8 @@ async function createHowTo(targets) {
   let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "How to...", "")
   await addContent(frame1, "Use this library", targets[0])
   await addContent(frame1, "Contribute", targets[1])
+
+  figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 }
 
 
@@ -232,6 +235,7 @@ async function createUse() {
   await addContent(frame1, "Purpose", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Purpose", "2. Describe the purpose\n\nThis library was created to fill a need. Describe that need and let designers what does (and doesn’t) fit within this library.\n\nYou can also add an image to the right that represents your library."))
   await addContent(frame1, "Principles", await createSlideFrame(TEMPLATE_BLOCKS, "Contributing", "Principles", "3. Add your own principles\n\nPrinciples keep foundational decisions consistent, and set precedent for how each component is used and built."))
   await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Instructions", "4. Add step-by-step instructions\n\nInclude instructions of where the assets can be found, how they are organized, how variants and overrides work, and any other details needed to use the library."))
+  figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 
   return frame1
 }
@@ -245,6 +249,7 @@ async function createContribute() {
   await addContent(frame1, "Conventions", await createSlideFrame(TEMPLATE_BLOCKS, "Contributing", "Conventions", "2. Add your own conventions\n\nWhat conventions does a designer need to be aware of to make components that work in a similar way to all the rest?"))
   await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Instructions", "3. Add step-by-step instructions\n\nInclude instructions on how to start a branch, organize pages, and request review."))
   await addContent(frame1, "Checklist", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Checklist", "4. Build a checklist\n\nWhat considerations do you go through before deciding if a component is ready to “go live”? These may refer back to your conventions."))
+  figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 
   return frame1
 }
