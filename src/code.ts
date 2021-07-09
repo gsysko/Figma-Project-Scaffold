@@ -243,10 +243,10 @@ async function createUse() {
 
   figma.currentPage = usePage
 
-  let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "Using this library", "", "1. Add sections here\n\nOptionally, add more sections to help describe the usage of your library.")
-  await addContent(frame1, "Purpose", await createSlideFrame(TEMPLATE_INFO, "Using this library", "Purpose", "2. Describe the purpose\n\nThis library was created to fill a need. Describe that need and let designers what does (and doesn’t) fit within this library.\n\nYou can also add an image to the right that represents your library.", "E.g. The Conversation Kit is a Figma library - and set of accompanying tools - that give designers everything they need to design a consistent conversational experience across any number of products and platforms."))
-  await addContent(frame1, "Principles", await createSlideFrame(TEMPLATE_BLOCKS, "Using this library", "Principles", "3. Add your own principles\n\nPrinciples keep foundational decisions consistent, and set precedent for how each component is used and built."))
-  await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Using this library", "Instructions", "4. Add step-by-step instructions\n\nInclude instructions of where the assets can be found, how they are organized, how variants and overrides work, and any other details needed to use the library.", "1) Do this\n\n2) Do that\n\n3) Profit"))
+  let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "Using this library", "", "1) Add sections here\n\nOptionally, add more sections to help describe the usage of your library.")
+  await addContent(frame1, "Purpose", await createSlideFrame(TEMPLATE_INFO, "Using this library", "Purpose", "2) Describe the purpose\n\nThis library was created to fill a need. Describe that need and let designers what does (and doesn’t) fit within this library.\n\nYou can also add an image to the right that represents your library.", "E.g. The Conversation Kit is a Figma library - and set of accompanying tools - that give designers everything they need to design a consistent conversational experience across any number of products and platforms."))
+  await addContent(frame1, "Principles", await createSlideFrame(TEMPLATE_BLOCKS, "Using this library", "Principles", "3) Add your own principles\n\nPrinciples keep foundational decisions consistent, and set precedent for how each component is used and built."))
+  await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Using this library", "Instructions", "4) Add step-by-step instructions\n\nInclude instructions of where the assets can be found, how they are organized, how variants and overrides work, and any other details needed to use the library.", "1. Do this\nDo that\nProfit"))
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 
   return frame1
@@ -257,10 +257,10 @@ async function createContribute() {
 
   figma.currentPage = contributePage
 
-  let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "Contributing", "", "1. Add sections here\n\nOptionally, add more sections to help describe how other designers can add to this library.")
-  await addContent(frame1, "Conventions", await createSlideFrame(TEMPLATE_BLOCKS, "Contributing", "Conventions", "2. Add your own conventions\n\nWhat conventions does a designer need to be aware of to make components that work in a similar way to all the rest?"))
-  await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Instructions", "3. Add step-by-step instructions\n\nInclude instructions on how to start a branch, organize pages, and request review.", "1) Create a Branch: Press the chevron next to the file name in the toolbar, and select Create branch.... Give it a name in the following format ➕<Component name>.\n\n2) Duplicate the ‘🚧 Component template’ page, and rename it according to the page naming converntions.\n\n3) Perform your explorations/work on this page.\n\n4) Complete the pre-publish checklist.\n\n5) Request review by sharing the branch with <team slack channel or point-of-contact>"))
-  await addContent(frame1, "Checklist", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Checklist", "4. Build a checklist\n\nWhat considerations do you go through before deciding if a component is ready to “go live”? These may refer back to your conventions.", "☑️ Did you do this?\n☑️ Did you do that?\n☑️ What about the other thing?"))
+  let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "Contributing", "", "1) Add sections here\n\nOptionally, add more sections to help describe how other designers can add to this library.")
+  await addContent(frame1, "Conventions", await createSlideFrame(TEMPLATE_BLOCKS, "Contributing", "Conventions", "2) Add your own conventions\n\nWhat conventions does a designer need to be aware of to make components that work in a similar way to all the rest?"))
+  await addContent(frame1, "Instructions", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Instructions", "3) Add step-by-step instructions\n\nInclude instructions on how to start a branch, organize pages, and request review.", "1. Create a Branch: Press the chevron next to the file name in the toolbar, and select Create branch.... Give it a name in the following format ➕<Component name>.\nDuplicate the ‘🚧 Component template’ page, and rename it according to the page naming converntions.\nPerform your explorations/work on this page.\nComplete the pre-publish checklist.\nRequest review by sharing the branch with <team slack channel or point-of-contact>"))
+  await addContent(frame1, "Checklist", await createSlideFrame(TEMPLATE_INFO, "Contributing", "Checklist", "4) Build a checklist\n\nWhat considerations do you go through before deciding if a component is ready to “go live”? These may refer back to your conventions.", "☑️  Did you do this?\n☑️  Did you do that?\n☑️  What about the other thing?"))
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 
   return frame1
@@ -287,7 +287,6 @@ async function createSlideFrame(id: string, supertitleText: string, titleText?: 
       if(supertitle) {
         await setText(supertitle, supertitleText)
       }
-
       let sections = format.findChild(node => node.name == "Sections") as FrameNode
       sections.children.forEach(node => node.visible = false)
       break;
@@ -341,5 +340,13 @@ async function addContent(tableFrame: FrameNode, title: string, target: FrameNod
 async function setText(node: TextNode, text: string) {
   await figma.loadFontAsync(node.fontName as FontName)
   node.characters = text
+  // Check if it should be an ordered or unordered list.
+  if (text.startsWith("1. ")) {
+    node.characters = node.characters.substring(3)
+    node.setRangeListOptions(0, node.characters.length, {type: "ORDERED"})
+  } else if (text.startsWith("- ")) {
+    node.characters = node.characters.substring(3)
+    node.setRangeListOptions(0, node.characters.length, {type: "UNORDERED"})
+  }
 }
 
