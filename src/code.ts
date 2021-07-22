@@ -41,8 +41,11 @@ const PADDING_V = 40
 const SPACING = 24
 const FONT_TITLES = { family: "Menlo", style: "Regular" }
 const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
+const COMPONENT_TITLE = "dcc85144737cc8736a780b6e428a146ae4560606"
+const COMPONENT_BLOCK = "59a17c300d40d952e4025d551ef25f906d92f437"
 
 async function createProject(title, type, description) {
+
   // Set page names and renames the default "Page 1"
   figma.currentPage.name = "📖 About"
   switch (type) {
@@ -92,8 +95,58 @@ async function createProject(title, type, description) {
   if (type == "Library"){
     let targets: FrameNode[] = [await createUse(), await createContribute()]
     await createHowTo(targets)
+
+    //Go to the component template page
+    figma.currentPage = figma.root.children[figma.root.children.length-1]
+
+    // Prepare the component template contents
+    let title = (await figma.importComponentByKeyAsync(COMPONENT_TITLE)).createInstance()
+    title.name = "Component title"
+    setText(title.findChild(node => node.type == "TEXT") as TextNode, "Component name")
+    title.resize(1440, title.height)
+    title.x = 0
+    title.y = -272
+
+    let building_blocks: FrameNode = figma.createFrame()
+    building_blocks.name = "Building blocks"
+    building_blocks.resize(1440, building_blocks.height)
+    building_blocks.x = 0
+    building_blocks.y = 1520
+    building_blocks.layoutMode = "VERTICAL"
+
+    let block = (await figma.importComponentByKeyAsync(COMPONENT_BLOCK)).createInstance()
+    let blockTitleText = block.findChild(node => node.type == "TEXT") as TextNode
+    await figma.loadFontAsync(blockTitleText.fontName as FontName)
+    blockTitleText.textAutoResize = "HEIGHT"
+    blockTitleText.layoutAlign = "STRETCH"
+    blockTitleText.characters = "Building blocks"
+    block.layoutAlign = "STRETCH"
+    building_blocks.appendChild(block)
+
+    let building_block_area = figma.createFrame()
+    building_block_area.name = "Place componnents here..."
+    building_block_area.layoutMode = "HORIZONTAL"
+    building_blocks.appendChild(building_block_area)
+    building_block_area.resize(1440, 480)
+    building_block_area.layoutGrow = 0
+    building_block_area.counterAxisSizingMode = "AUTO"
+    building_block_area.primaryAxisSizingMode = "AUTO"
+    building_block_area.verticalPadding = 40
+    building_block_area.horizontalPadding = 40
+    building_block_area.itemSpacing = 40
+    building_blocks.counterAxisSizingMode = "AUTO"
+    figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
+
+    // Add the template to any pages with 'Component' in the title
+    figma.root.findChildren(pageNode => pageNode.name.includes("Component")).forEach(pageNode => {
+      pageNode.appendChild(title.clone())
+      pageNode.appendChild(building_blocks.clone())
+      figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
+    })
+
   }
   figma.currentPage = figma.root.children[0]
+  figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
   figma.closePlugin()
 }
 
@@ -337,6 +390,7 @@ async function addContent(tableFrame: FrameNode, title: string, target: FrameNod
   section.hyperlink = {type: "NODE", value: target.id}
   section.visible = true
 }
+
 async function setText(node: TextNode, text: string) {
   await figma.loadFontAsync(node.fontName as FontName)
   node.characters = text
