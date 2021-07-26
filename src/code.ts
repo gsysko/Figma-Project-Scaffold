@@ -137,12 +137,16 @@ async function createProject(title, type, description) {
     building_blocks.counterAxisSizingMode = "AUTO"
     figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
 
-    // Add the template to any pages with 'Component' in the title
+    // Then add the template to any pages with 'Component' in the title
     figma.root.findChildren(pageNode => pageNode.name.includes("Component")).forEach(pageNode => {
       pageNode.appendChild(title.clone())
       pageNode.appendChild(building_blocks.clone())
       figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
     })
+
+    //Clear up the "extra" template
+    title.remove()
+    building_blocks.remove()
 
   }
   figma.currentPage = figma.root.children[0]
