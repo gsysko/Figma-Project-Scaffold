@@ -9,6 +9,9 @@ const TEMPLATE_CONTENTS = "c769a6265556c091cc1d8c05762c71ecbf97314b"
 const TEMPLATE_BLOCKS = "52058e4454d829872482b8551f4918cb828880d6"
 const TEMPLATE_INFO = "d45b3005516f887724940a5a10663adcff9dc4b4"
 
+//Font styles
+const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
+
 var listFrame: FrameNode
 var detailsFrame: FrameNode
 
@@ -99,14 +102,16 @@ async function createProject(title, type, description) {
     //Go to the component template page
     figma.currentPage = figma.root.children[figma.root.children.length-1]
 
-    // Prepare the component template contents
+    // Prepare a component template
+    //Create title
     let title = (await figma.importComponentByKeyAsync(COMPONENT_TITLE)).createInstance()
     title.name = "Component title"
     setText(title.findChild(node => node.type == "TEXT") as TextNode, "Component name")
-    title.resize(1440, title.height)
-    title.x = 0
-    title.y = -272
+    title.resize(1280, title.height)
+    title.x = 80
+    title.y = 80
 
+    //Create building blocks area
     let building_blocks: FrameNode = figma.createFrame()
     building_blocks.name = "Building blocks"
     building_blocks.resize(1440, building_blocks.height)
@@ -134,13 +139,39 @@ async function createProject(title, type, description) {
     building_block_area.verticalPadding = 40
     building_block_area.horizontalPadding = 40
     building_block_area.itemSpacing = 40
+    building_block_area.fills = []
     building_blocks.counterAxisSizingMode = "AUTO"
+
+    //Create background
+    var background = figma.createRectangle()
+    background.resize(1440, 1440)
+    background.name = "Background"
+    background.fills = [{"type":"SOLID","visible":true,"opacity":1,"blendMode":"NORMAL","color":{"r":1,"g":1,"b":1}}]
+
+    // Create description
+    var descriptionText = figma.createText()
+    try {
+      await figma.importStyleByKeyAsync(WEB_XXXLARGE).then(baseStyle => { descriptionText.textStyleId = baseStyle.id })
+    } catch (error) {
+      figma.notify("Font styles are missing!")
+    }
+    descriptionText.resize(1280, 88)
+    descriptionText.name = "Description"
+    descriptionText.x = 80
+    descriptionText.y = 352
+    descriptionText.autoRename = false
+    await figma.loadFontAsync(descriptionText.fontName as FontName)
+    descriptionText.textAutoResize = "HEIGHT"
+    descriptionText.characters = "Type a description of the component here, and place any components/variants in the space below ↘️"
+
     figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
 
     // Then add the template to any pages with 'Component' in the title
     figma.root.findChildren(pageNode => pageNode.name.includes("Component")).forEach(pageNode => {
-      pageNode.appendChild(title.clone())
       pageNode.appendChild(building_blocks.clone())
+      pageNode.appendChild(background.clone())
+      pageNode.appendChild(descriptionText.clone())
+      pageNode.appendChild(title.clone())
       figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
     })
 
