@@ -246,6 +246,7 @@ async function createThumbnail(title: string, type: string) {
 
     if (component) {
       let thumbnail = component.createInstance()
+      thumbnail.scaleFactor = 1/3
       thumbnailFrame.appendChild(thumbnail)
       figma.currentPage.appendChild(thumbnailFrame)
 
