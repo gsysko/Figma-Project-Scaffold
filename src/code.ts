@@ -242,7 +242,7 @@ async function createThumbnail(title: string, type: string) {
     figma.closePlugin()
   }).then(async component => {
     let thumbnailFrame = figma.createFrame()
-    thumbnailFrame.name = "Thumbnail - Right click to \"Set as thumbnail\""
+    thumbnailFrame.name = "Thumbnail"
     thumbnailFrame.resizeWithoutConstraints(640, 320)
 
     if (component) {
@@ -272,6 +272,7 @@ async function createThumbnail(title: string, type: string) {
         badgeText.fillStyleId = (await figma.importStyleByKeyAsync("492c9645d67f026dd37c301c61577504bd7d8ad7")).id
       }
     }
+    figma.setFileThumbnailNodeAsync(thumbnailFrame)
   })
 }
 
