@@ -178,7 +178,8 @@ async function createProject(title, type, description) {
     //Clear up the "extra" template
     title.remove()
     building_blocks.remove()
-
+    descriptionText.remove()
+    background.remove()
   }
   figma.currentPage = figma.root.children[0]
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
