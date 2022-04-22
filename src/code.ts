@@ -17,7 +17,7 @@ var detailsFrame: FrameNode
 
 // This shows the HTML page in "ui.html".
 figma.showUI(__html__)
-figma.ui.resize(400, 400)
+figma.ui.resize(400, 560)
 
 if(figma.root.getPluginData("status") == "run") {
   //TODO evaluate if there is some way to reconfigure the pages after initial setup.
