@@ -9,7 +9,7 @@ import { Field, Label, Input, InputGroup, Hint } from '@zendeskgarden/react-form
 import { Button } from '@zendeskgarden/react-buttons';
 
 const StyledRow = styled(Row)`
-  padding-top: 16px;
+  padding-top: 12px;
 `;
 
 const validHex = /^#(?:(?:[0-9A-F]{6}(?:[0-9A-F]{2})?)|(?:[0-9A-F]{3})(?:[0-9A-F]?))$/iu;
@@ -40,13 +40,26 @@ const toHex = (selectedColor: IColor) => {
   return `${colorHex}${alphaHex}`;
 };
 
+function resize(height: number) {
+  parent.postMessage({ pluginMessage: { type: 'resize', height: height } }, '*');
+}
+
 
 const FormTheme = () => {
-  const [primaryColor, setPrimaryColor] = useState<string | IColor>("#17494D");
-  const [messageColor, setMessageColor] = useState<string | IColor>("#03363D");
-  const [actionColor, setActionColor] = useState<string | IColor>("#008847");
+  const [themeName, setThemeName] = useState<string>("Default theme");
+  const [primaryColor, setPrimaryColor] = useState<string>("#17494D");
+  const [messageColor, setMessageColor] = useState<string>("#03363D");
+  const [actionColor, setActionColor] = useState<string>("#008847");
 
   return (<>
+    <Row>
+      <Col>
+        <Field>
+          <Label>Title</Label>
+          <Input placeholder="E.g. Messaging Theme" onChange={e => setThemeName(e.target.value)}/>
+        </Field>
+      </Col>
+    </Row>
     <Row>
       <Col>
         <Label>Theme colors</Label>
@@ -58,10 +71,12 @@ const FormTheme = () => {
           <Hint>Primary</Hint>
           <ColorpickerDialog
               focusInset
-              defaultColor={primaryColor}
+              color={primaryColor}
               isOpaque
+              placement='bottom-start'
+              onDialogChange={changes => changes.isOpen ? resize(624) : resize(330)}
               onChange={selectedColor => {
-                setPrimaryColor(selectedColor);
+                setPrimaryColor(selectedColor.hex);
               }}
               buttonProps={{
                 'aria-label': 'choose your primary color'
@@ -74,10 +89,11 @@ const FormTheme = () => {
           <Hint>Message</Hint>
           <ColorpickerDialog
               focusInset
-              defaultColor={messageColor}
+              color={messageColor}
               isOpaque
+              placement='bottom'
               onChange={selectedColor => {
-                setMessageColor(selectedColor);
+                setMessageColor(selectedColor.hex);
               }}
               buttonProps={{
                 'aria-label': 'choose your message color'
@@ -90,10 +106,11 @@ const FormTheme = () => {
           <Hint>Action</Hint>
           <ColorpickerDialog
               focusInset
-              defaultColor={actionColor}
+              color={actionColor}
               isOpaque
+              placement='bottom-end'
               onChange={selectedColor => {
-                setActionColor(selectedColor);
+                setActionColor(selectedColor.hex);
               }}
               buttonProps={{
                 'aria-label': 'choose your action color'
@@ -104,7 +121,7 @@ const FormTheme = () => {
     </Row>
     <StyledRow>
           <Col>
-            <Button isPrimary isStretched>
+            <Button isPrimary isStretched onClick={()=>parent.postMessage({ pluginMessage: { type: 'create-theme', themeName: themeName, primaryColor: primaryColor, messageColor: messageColor, actionColor: actionColor } }, '*')}>
               Generate theme
             </Button>
           </Col>
@@ -114,3 +131,6 @@ const FormTheme = () => {
 
 export default FormTheme;
 
+// function createTheme(primaryColor: string, messageColor: string, actionColor: string) {
+//   parent.postMessage({ pluginMessage: { type: 'create-theme', primaryColor: primaryColor, messageColor: messageColor, actionColor: actionColor } }, '*');
+// }

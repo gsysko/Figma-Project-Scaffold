@@ -9,34 +9,8 @@ import { Button } from '@zendeskgarden/react-buttons';
 import { Row, Col } from '@zendeskgarden/react-grid';
 import styled from 'styled-components';
 
-import { FormExploration } from './formExploration'
+import FormGeneric from './formGeneric'
 import FormTheme from './formTheme'
-
-// declare function require(path: string): any
-
-// class App extends React.Component {
-//   textbox: HTMLInputElement
-
-//   countRef = (element: HTMLInputElement) => {
-//     if (element) element.value = '5'
-//     this.textbox = element
-//   }
-
-//   onCreate = () => {
-//     const count = parseInt(this.textbox.value, 10)
-//     parent.postMessage({ pluginMessage: { type: 'create-rectangles', count } }, '*')
-//   }
-
-//   onCancel = () => {
-//     parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
-//   }
-
-//   render() {
-//     return <ThemeProvider>
-//     <FormProject />
-//   </ThemeProvider>;
-//   }
-// }
 
 interface IItem {
   label: string;
@@ -57,6 +31,10 @@ const App = () => {
     console.log('You clicked submit.');
   }
 
+  function resize(height: number) {
+    parent.postMessage({ pluginMessage: { type: 'resize', height: height } }, '*');
+  }
+
   return (
     <ThemeProvider>
       <form onSubmit={handleSubmit}>
@@ -64,7 +42,18 @@ const App = () => {
           <Col>
             <Dropdown
               selectedItem={selectedItem}
-              onSelect={setSelectedItem}
+              onSelect={ selectedItem => {
+                  setSelectedItem(selectedItem)
+                  switch (selectedItem.value){
+                    case 'Theme':
+                      // resize(624)
+                      break
+                    default:
+                      // resize(330)
+                      break
+                  }
+                }
+              }
               downshiftProps={{ itemToString: (item: IItem) => item && item.label }}
             >
               <Field>
@@ -81,7 +70,7 @@ const App = () => {
             </Dropdown>
           </Col>
         </Row>
-        {selectedItem.value == 'theme' ? <FormTheme /> : <FormExploration projectType={selectedItem.value}/>}
+        {selectedItem.value == 'Theme' ? <FormTheme /> : <FormGeneric projectType={selectedItem.value}/>}
       </form>
     </ThemeProvider>
   );

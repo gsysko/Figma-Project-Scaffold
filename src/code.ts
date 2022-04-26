@@ -1,3 +1,4 @@
+import { rgb, readableColor } from 'polished';
 // This plugin will open a window to prompt the user to enter project details, and
 // it will then create a document structure and thumbnail.
 
@@ -12,12 +13,682 @@ const TEMPLATE_INFO = "d45b3005516f887724940a5a10663adcff9dc4b4"
 //Font styles
 const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
 
-var listFrame: FrameNode
-var detailsFrame: FrameNode
+const PADDING_H = 40
+const PADDING_V = 40
+const SPACING = 24
+const FONT_TITLES = { family: "Menlo", style: "Regular" }
+const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
+const COMPONENT_TITLE = "dcc85144737cc8736a780b6e428a146ae4560606"
+const COMPONENT_BLOCK = "59a17c300d40d952e4025d551ef25f906d92f437"
+
+const SOLID: 'SOLID' = 'SOLID'
+const NORMAL: 'NORMAL' = 'NORMAL'
+
+const BLACK = {
+  "type": SOLID,
+  "visible": true,
+  "opacity": 1,
+  "blendMode": NORMAL,
+  "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+  }
+}
+
+const WHITE = {
+  "type": SOLID,
+  "visible": true,
+  "opacity": 1,
+  "blendMode": NORMAL,
+  "color": {
+      "r": 1,
+      "g": 1,
+      "b": 1
+  }
+}
+
+var LIGHT_TEXT_COLOR_STYLE
+var DARK_TEXT_COLOR_STYLE
+
+type ColorMode = "dark" | "light"
+
+let LIGHT_COLORS_CUSTOM = [
+  {
+    name: "primary",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "message",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "action",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  }
+]
+
+let DARK_COLORS_CUSTOM = [
+  {
+    name: "primary",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "message",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "action",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  }
+]
+
+let LIGHT_COLORS_GENERATED = [
+  {
+    name: "onPrimary",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "onMessage",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "onAction",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "actionForeground",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "actionBackground",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+]
+
+let DARK_COLORS_GENERATED = [
+  {
+    name: "onPrimary",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "onMessage",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "onAction",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "actionForeground",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "actionBackground",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+]
+
+let LIGHT_COLORS_FIXED = [
+  {
+    name: "note",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 0.9411764740943909,
+          "b": 0.8588235378265381
+      }
+    }
+  },
+  {
+    name: "onNote",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 0,
+          "g": 0,
+          "b": 0
+      }
+    }
+  },{
+    name: "inboundMessage",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 0.95686274766922,
+          "g": 0.9647058844566345,
+          "b": 0.9725490212440491
+      }
+    }
+  },
+  {
+    name: "systemMessage",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "borderSystemMessage",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 0.11999999731779099,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 0,
+          "g": 0,
+          "b": 0
+      }
+    }
+  },
+  {
+    name: "background",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "onBackground",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 0,
+          "g": 0,
+          "b": 0
+      }
+    }
+  },
+  {
+    name: "elevated",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "danger",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 0.9411764740943909,
+          "b": 0.9450980424880981
+      }
+    }
+  },
+  {
+    name: "onDanger",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 0.5490196347236633,
+          "g": 0.13725490868091583,
+          "b": 0.1725490242242813
+      }
+    }
+  },
+  {
+    name: "success",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 0.0117647061124444,
+          "g": 0.5058823823928833,
+          "b": 0.32549020648002625
+      }
+    }
+  },
+  {
+    name: "notify",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 0.800000011920929,
+          "g": 0.20000000298023224,
+          "b": 0.250980406999588
+      }
+    }
+  },
+  {
+    name: "disabled",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 0.800000011920929,
+          "g": 0.800000011920929,
+          "b": 0.800000011920929
+      }
+    }
+  },
+  {
+    name: "icon",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 0.18431372940540314,
+          "g": 0.2235294133424759,
+          "b": 0.2549019753932953
+      }
+    }
+  }
+]
+
+let DARK_COLORS_FIXED = [
+  {
+    name: "note",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+        "r": 0.9960784316062927,
+        "g": 0.8392156958580017,
+        "b": 0.658823549747467
+      }
+    }
+  },
+  {
+    name: "onNote",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      }
+    }
+  },
+  {
+    name: "inboundMessage",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+        "r": 0.18431372940540314,
+        "g": 0.2235294133424759,
+        "b": 0.2549019753932953
+      }
+    }
+  },
+  {
+    name: "systemMessage",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 0,
+          "g": 0,
+          "b": 0
+      }
+    }
+  },
+  {
+    name: "borderSystemMessage",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 0.3499999940395355,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "background",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 0,
+          "g": 0,
+          "b": 0
+      }
+    }
+  },
+  {
+    name: "onBackground",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+      }
+    }
+  },
+  {
+    name: "elevated",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+        "r": 0.10000000149011612,
+        "g": 0.10000000149011612,
+        "b": 0.10000000149011612
+      }
+    }
+  },
+  {
+    name: "danger",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+        "r": 0.40784314274787903,
+        "g": 0.07058823853731155,
+        "b": 0.09803921729326248
+      }
+    }
+  },
+  {
+    name: "onDanger",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+        "r": 0.9607843160629272,
+        "g": 0.8352941274642944,
+        "b": 0.8470588326454163
+      }
+    }
+  },
+  {
+    name: "success",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+        "r": 0.16078431904315948,
+        "g": 0.6117647290229797,
+        "b": 0.4000000059604645
+      }
+    }
+  },
+  {
+    name: "notify",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+        "r": 0.18431372940540314,
+        "g": 0.2235294133424759,
+        "b": 0.2549019753932953
+      }
+    }
+  },
+  {
+    name: "disabled",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+        "r": 0.18431372940540314,
+        "g": 0.2235294133424759,
+        "b": 0.2549019753932953
+      }
+    }
+  },
+  {
+    name: "icon",
+    fill: {
+      "type": SOLID,
+      "visible": true,
+      "opacity": 1,
+      "blendMode": NORMAL,
+      "color": {
+        "r": 0.529411792755127,
+        "g": 0.572549045085907,
+        "b": 0.615686297416687
+      }
+    }
+  }
+]
 
 // This shows the HTML page in "ui.html".
 figma.showUI(__html__)
-figma.ui.resize(400, 560)
+figma.ui.resize(400, 330)
 
 if(figma.root.getPluginData("status") == "run") {
   //TODO evaluate if there is some way to reconfigure the pages after initial setup.
@@ -29,23 +700,25 @@ if(figma.root.getPluginData("status") == "run") {
 // callback. The callback will be passed the "pluginMessage" property of the
 // posted message.
 figma.ui.onmessage = async msg => {
+  await loadResources()
   switch (msg.type) {
-    case "create-projct":
+    case "resize":
+      figma.ui.resize(400, msg.height)
+      break
+    case "create-project":
       figma.ui.hide()
       await createProject(msg.projectTitle, msg.projectType, msg.projectDescription)
       figma.root.setRelaunchData({about: "This document was formated with Ztart"})
       figma.root.setPluginData("status", "run")
       break
+    case "create-theme":
+      figma.ui.hide()
+      await createTheme(msg.themeName, msg.primaryColor, msg.messageColor, msg.actionColor)
+      figma.root.setRelaunchData({update: "Update theme colors"})
+      figma.root.setPluginData("status", "run")
+      break
   }
 }
-
-const PADDING_H = 40
-const PADDING_V = 40
-const SPACING = 24
-const FONT_TITLES = { family: "Menlo", style: "Regular" }
-const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
-const COMPONENT_TITLE = "dcc85144737cc8736a780b6e428a146ae4560606"
-const COMPONENT_BLOCK = "59a17c300d40d952e4025d551ef25f906d92f437"
 
 async function createProject(title, type, description) {
 
@@ -86,10 +759,6 @@ async function createProject(title, type, description) {
       createPage("🚧 Component template")
       break;
   }
-
-  // Need to load a font here to generate the other page examples.
-  await figma.loadFontAsync(FONT_TITLES)
-  await figma.loadFontAsync(FONT_BODIES)
 
   //Add a thumnail to the first page.
   await createThumbnail(title, type).then(async () => {
@@ -146,7 +815,7 @@ async function createProject(title, type, description) {
     var background = figma.createRectangle()
     background.resize(1440, 1440)
     background.name = "Background"
-    background.fills = [{"type":"SOLID","visible":true,"opacity":1,"blendMode":"NORMAL","color":{"r":1,"g":1,"b":1}}]
+    background.fills = [{"type":SOLID,"visible":true,"opacity":1,"blendMode":NORMAL,"color":{"r":1,"g":1,"b":1}}]
 
     // Create description
     var descriptionText = figma.createText()
@@ -187,7 +856,7 @@ async function createProject(title, type, description) {
 }
 
 function createProjectDetails(description, type) {
-  detailsFrame = figma.createFrame()
+  let detailsFrame = figma.createFrame()
   detailsFrame.name = "Project details"
   detailsFrame.y = 340
   detailsFrame.resizeWithoutConstraints(640, 1)
@@ -198,13 +867,13 @@ function createProjectDetails(description, type) {
   detailsFrame.itemSpacing = SPACING
   figma.currentPage.appendChild(detailsFrame)
 
-  createDetail("Description", description !== "" ? description : "<Enter a description here>")
-  createDetail("External Links", "<Add links here> →\n<E.g. Confluence> →\n<E.g. Google Doc> →")
-  createDetail("Slack Channels", "#<channel name here>\n#<channel name here>")
-  createDetail("Points of Contact", "Design - <link Slack profile here>\nProduct - <link Slack profile here>\nEngineering - <link Slack profile here>")
+  detailsFrame.appendChild(createDetail("Description", description !== "" ? description : "<Enter a description here>"))
+  detailsFrame.appendChild(createDetail("External Links", "<Add links here> →\n<E.g. Confluence> →\n<E.g. Google Doc> →"))
+  detailsFrame.appendChild(createDetail("Slack Channels", "#<channel name here>\n#<channel name here>"))
+  detailsFrame.appendChild(createDetail("Points of Contact", "Design - <link Slack profile here>\nProduct - <link Slack profile here>\nEngineering - <link Slack profile here>"))
 
   // Frame for wrapping the list of page examples.
-  listFrame = figma.createFrame()
+  let listFrame = figma.createFrame()
   listFrame.name = "Add other pages, as needed..."
   listFrame.y = detailsFrame.y + detailsFrame.height + SPACING
   listFrame.resizeWithoutConstraints(640, 1)
@@ -220,16 +889,16 @@ function createProjectDetails(description, type) {
   // text to our scratch page so we can copy/paste them with the proper emoji.
   switch (type) {
     case "Exploration":
-      createPageExample("⏳ History")
-      createPageExample("✅ Next steps")
+      listFrame.appendChild(createPageExample("⏳ History"))
+      listFrame.appendChild(createPageExample("✅ Next steps"))
     break
     case "Product":
-      createPageExample("💅🏽 Styles")
-      createPageExample("⚙️ Components")
+      listFrame.appendChild(createPageExample("💅🏽 Styles"))
+      listFrame.appendChild(createPageExample("⚙️ Components"))
     break
     case "Library":
-      createPageExample("💅🏽 Styles")
-      createPageExample("🚀 Roadmap")
+      listFrame.appendChild(createPageExample("💅🏽 Styles"))
+      listFrame.appendChild(createPageExample("🚀 Roadmap"))
     break
   }
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
@@ -305,7 +974,7 @@ function createDetail(title: string, body: string) {
   bodyText.layoutAlign = "STRETCH"
   detailFrame.appendChild(bodyText)
 
-  detailsFrame.appendChild(detailFrame)
+  return detailFrame
 }
 
 // Adds an example to your list frame.
@@ -314,7 +983,7 @@ function createPageExample(text: string) {
   linkLabel.fontName = FONT_BODIES
   linkLabel.fontSize = 14
   linkLabel.characters = text
-  listFrame.appendChild(linkLabel)
+  return linkLabel
 }
 
 async function createHowTo(targets) {
@@ -442,3 +1111,269 @@ async function setText(node: TextNode, text: string) {
   }
 }
 
+async function createTheme(themeName: string, primaryColor: string, messageColor: string, actionColor: string) {
+  figma.currentPage = figma.root.children[0]
+  // Set page names and renames the default "Page 1"
+  figma.currentPage.name = "00 Overview"
+  createPage("01 Colors")
+  createPage("02 Icons")
+  createPage("03 Images")
+
+  //Add a thumnail to the first page.
+  await createThumbnail(themeName, "Theme").then(async () => {
+    //TODO set thumbnail BG to primary color
+  })
+
+  LIGHT_COLORS_CUSTOM[0].fill.color = hexToRGB(primaryColor)
+  LIGHT_COLORS_CUSTOM[1].fill.color = hexToRGB(messageColor)
+  LIGHT_COLORS_CUSTOM[2].fill.color = hexToRGB(actionColor)
+  DARK_COLORS_CUSTOM[0].fill.color = hexToRGB(primaryColor)
+  DARK_COLORS_CUSTOM[1].fill.color = hexToRGB(messageColor)
+  DARK_COLORS_CUSTOM[2].fill.color = hexToRGB(actionColor)
+
+  await createMode("light", themeName, primaryColor, messageColor, actionColor)
+  await createMode("dark", themeName, primaryColor, messageColor, actionColor)
+  figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
+  figma.closePlugin()
+}
+
+async function createMode(mode: ColorMode, themeName: string, primaryColor: string, messageColor: string, actionColor: string) {
+  let modeFrame = figma.createFrame()
+  modeFrame.name = (mode == "light" ? "☀️" : "☽")
+  modeFrame.fills = []
+  modeFrame.primaryAxisSizingMode = "AUTO"
+  modeFrame.counterAxisSizingMode = "AUTO"
+  modeFrame.layoutMode = "VERTICAL"
+  modeFrame.itemSpacing = 64
+  if (mode == "dark") modeFrame.x = 2080
+  let titleInstance = (await figma.importComponentByKeyAsync(COMPONENT_TITLE)).createInstance()
+  await setText(titleInstance.findChild(node => node.name == "Section name") as TextNode, mode == "light" ? "Light mode" : "Dark mode")
+  titleInstance.layoutAlign = "STRETCH"
+  modeFrame.appendChild(titleInstance)
+  let colorsFrame = figma.createFrame()
+  colorsFrame.name = "Colors"
+  colorsFrame.fills = (mode == "light" ? [WHITE] : [BLACK])
+  colorsFrame.primaryAxisSizingMode = "AUTO"
+  colorsFrame.counterAxisSizingMode = "AUTO"
+  colorsFrame.layoutMode = "HORIZONTAL"
+  colorsFrame.verticalPadding = 120 
+  colorsFrame.horizontalPadding = 120
+  colorsFrame.itemSpacing = 120
+  modeFrame.appendChild(colorsFrame)
+  let customizableFrame = figma.createFrame()
+  customizableFrame.name = "Fixed"
+  customizableFrame.fills = []
+  customizableFrame.primaryAxisSizingMode = "AUTO"
+  customizableFrame.counterAxisSizingMode = "AUTO"
+  customizableFrame.layoutMode = "VERTICAL"
+  customizableFrame.itemSpacing = 80
+  let blockInstance = (mode == "light" ? (await figma.importComponentByKeyAsync(COMPONENT_BLOCK)).createInstance() : (await figma.importComponentByKeyAsync("52b4796a679cb0e606ba878f94d6ef5b72603028")).createInstance())
+  await setText(blockInstance.findChild(node => node.name == "Section name") as TextNode, "Customizable")
+  blockInstance.layoutGrow = 0
+  blockInstance.counterAxisSizingMode = "FIXED"
+  blockInstance.resizeWithoutConstraints(800, blockInstance.height)
+  customizableFrame.appendChild(blockInstance)
+  let fixedFrame = customizableFrame.clone()
+  colorsFrame.appendChild(customizableFrame)
+  fixedFrame.name = "Fixed"
+  fixedFrame.primaryAxisSizingMode = "AUTO"
+  fixedFrame.counterAxisSizingMode = "AUTO"
+  fixedFrame.layoutMode = "VERTICAL"
+  fixedFrame.itemSpacing = 80
+  await setText(fixedFrame.findOne(node => node.type == "TEXT" && node.name == "Section name") as TextNode, "Fixed")
+  colorsFrame.appendChild(fixedFrame)
+
+  if(mode == "light"){
+    LIGHT_COLORS_CUSTOM.forEach(color => createStyle(themeName, "light", color.name, color.fill, customizableFrame))
+    LIGHT_COLORS_GENERATED.forEach(color => createStyle(themeName, "light", color.name, color.fill, fixedFrame))
+    updateGeneratedColors("light")
+    LIGHT_COLORS_FIXED.forEach(color => createStyle(themeName, "light", color.name, color.fill, fixedFrame))
+  } else {
+    DARK_COLORS_CUSTOM.forEach(color => createStyle(themeName, "dark", color.name, color.fill, customizableFrame))
+    DARK_COLORS_GENERATED.forEach(color => createStyle(themeName, "dark", color.name, color.fill, fixedFrame))
+    updateGeneratedColors("dark")
+    DARK_COLORS_FIXED.forEach(color => createStyle(themeName, "dark", color.name, color.fill, fixedFrame))
+  }
+
+  figma.root.children[1].appendChild(modeFrame)
+}
+
+async function createStyle(themeName: string, mode: ColorMode, colorName: string, fill: Paint, exampleTarget: FrameNode){
+  let newStyle = figma.createPaintStyle()
+  newStyle.name = themeName + "(" + mode + ")/" + colorName
+  newStyle.setPluginData("colorName", colorName)
+  newStyle.setPluginData("colorMode", mode)
+  newStyle.paints = [fill]
+
+  let exampleFrame = figma.createFrame()
+  exampleFrame.name = colorName + " example"
+  exampleFrame.fills = []
+  exampleFrame.primaryAxisSizingMode = "AUTO"
+  exampleFrame.counterAxisSizingMode = "AUTO"
+  exampleFrame.layoutMode = "HORIZONTAL"
+  exampleFrame.counterAxisAlignItems = "CENTER"
+  exampleFrame.paddingLeft = 40
+  exampleFrame.itemSpacing = 32
+  let exampleSwatch = figma.createEllipse()
+  exampleSwatch.setPluginData("colorName", colorName)
+  exampleSwatch.fillStyleId = newStyle.id
+  let exampleText = figma.createText()
+  exampleText.fontName = FONT_TITLES
+  exampleText.fontSize = 48
+  exampleText.characters = colorName
+  exampleText.fillStyleId = (mode == "light" ? LIGHT_TEXT_COLOR_STYLE.id : DARK_TEXT_COLOR_STYLE.id)
+  exampleFrame.appendChild(exampleSwatch)
+  exampleFrame.appendChild(exampleText)
+  exampleTarget.appendChild(exampleFrame)
+}
+
+function updateGeneratedColors(mode: ColorMode) {
+  let currentPrimaryColor = (figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "primary").paints[0] as SolidPaint).color
+  let currentMessageColor = (figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "message").paints[0] as SolidPaint).color
+  let currentActionColor = (figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "action").paints[0] as SolidPaint).color
+
+  let onPrimaryStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "onPrimary")
+  let onPrimaryPaint: Paint = {
+    "type": SOLID,
+    "visible": true,
+    "opacity": 1,
+    "blendMode": NORMAL,
+    "color": getReadableColor(currentPrimaryColor)
+  }
+  onPrimaryStyle.paints = [onPrimaryPaint]
+  let onMessageStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "onMessage")
+  let onMessagePaint: Paint = {
+    "type": SOLID,
+    "visible": true,
+    "opacity": 1,
+    "blendMode": NORMAL,
+    "color": getReadableColor(currentMessageColor)
+  }
+  onMessageStyle.paints = [onMessagePaint]
+  let onActionStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "onAction")
+  let onActionPaint: Paint = {
+    "type": SOLID,
+    "visible": true,
+    "opacity": 1,
+    "blendMode": NORMAL,
+    "color": getReadableColor(currentActionColor)
+  }
+  onActionStyle.paints = [onMessagePaint]
+
+  let currentActionForegroundStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "actionForeground")
+  let currentActionBackgroundStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "actionBackground")
+  console.log(currentPrimaryColor);
+}
+
+async function loadResources() {
+  // Need to load a font here to generate the other page examples.
+  await figma.loadFontAsync(FONT_TITLES)
+  await figma.loadFontAsync(FONT_BODIES)
+
+  LIGHT_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("f207233833aea62e2f0163bb4b6c6ed602459ba1")
+  DARK_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("5638e43c82613c7f15c60e3e8e9496c17763ae49")
+}
+
+// ~~~~~~Helper Functions~~~~~~~~~~~ //
+function RGBToHSL(rgb: RGB) {
+  let r = rgb.r
+  let g = rgb.g
+  let b = rgb.b
+
+  // Find greatest and smallest channel values
+  let cmin = Math.min(r,g,b),
+      cmax = Math.max(r,g,b),
+      delta = cmax - cmin,
+      h = 0,
+      s = 0,
+      l = 0;
+
+  // Calculate hue
+  // No difference
+  if (delta == 0)
+    h = 0;
+  // Red is max
+  else if (cmax == r)
+    h = ((g - b) / delta) % 6;
+  // Green is max
+  else if (cmax == g)
+    h = (b - r) / delta + 2;
+  // Blue is max
+  else
+    h = (r - g) / delta + 4;
+
+  h = Math.round(h * 60);
+    
+  // Make negative hues positive behind 360°
+  if (h < 0)
+      h += 360;
+
+  // Calculate lightness
+  l = (cmax + cmin) / 2;
+
+  // Calculate saturation
+  s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    
+  // Multiply l and s by 100
+  s = +(s * 100).toFixed(1);
+  l = +(l * 100).toFixed(1);
+
+  return {hue: h, saturation: s, lightness: l};
+}
+
+function HSLToRGB(hsl) {
+  let h = hsl.hue
+  let s = hsl.saturation
+  let l = hsl.lightness
+  // Must be fractions of 1
+  s /= 100;
+  l /= 100;
+
+  let c = (1 - Math.abs(2 * l - 1)) * s,
+      x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+      m = l - c/2,
+      r = 0,
+      g = 0,
+      b = 0;
+
+  if (0 <= h && h < 60) {
+    r = c; g = x; b = 0;  
+  } else if (60 <= h && h < 120) {
+    r = x; g = c; b = 0;
+  } else if (120 <= h && h < 180) {
+    r = 0; g = c; b = x;
+  } else if (180 <= h && h < 240) {
+    r = 0; g = x; b = c;
+  } else if (240 <= h && h < 300) {
+    r = x; g = 0; b = c;
+  } else if (300 <= h && h < 360) {
+    r = c; g = 0; b = x;
+  }
+
+  r = r + m;
+  g = g + m;
+  b = b + m;
+
+  return {r: r, g: g, b: b};
+}
+
+function hexToRGB(hex: string) {
+  let r, g, b
+
+  hex = hex.replace(/^#/, '');
+
+  const number = Number.parseInt(hex, 16);
+	const red = number >> 16;
+	const green = (number >> 8) & 255;
+	const blue = number & 255;
+
+	return {r: red/256, g: green/256, b: blue/256};
+}
+
+function getReadableColor(backgroundColor: RGB): RGB {
+  debugger
+  let backgroundHex = rgb(Math.round(backgroundColor.r * 255), Math.round(backgroundColor.g * 255), Math.round(backgroundColor.b * 255))
+  let foregroundHex = readableColor(backgroundHex)
+  let foregroundColor = hexToRGB(foregroundHex)
+  return foregroundColor;
+}
