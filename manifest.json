@@ -6,7 +6,7 @@
   "main": "dist/code.js",
   "ui": "dist/ui.html",
   "relaunchButtons": [
-    {"name": "About Zstart", "command": "about"},
-    {"name": "Update colors", "command": "update"}
+    {"command": "about", "name": "About Zstart"},
+    {"command": "update", "name": "Update colors"}
   ]
 }

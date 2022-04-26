@@ -73,6 +73,7 @@ const FormTheme = () => {
               focusInset
               color={primaryColor}
               isOpaque
+              hasArrow
               placement='bottom-start'
               onDialogChange={changes => changes.isOpen ? resize(624) : resize(330)}
               onChange={selectedColor => {
@@ -91,7 +92,9 @@ const FormTheme = () => {
               focusInset
               color={messageColor}
               isOpaque
+              hasArrow
               placement='bottom'
+              onDialogChange={changes => changes.isOpen ? resize(624) : resize(330)}
               onChange={selectedColor => {
                 setMessageColor(selectedColor.hex);
               }}
@@ -108,7 +111,9 @@ const FormTheme = () => {
               focusInset
               color={actionColor}
               isOpaque
+              hasArrow
               placement='bottom-end'
+              onDialogChange={changes => changes.isOpen ? resize(624) : resize(330)}
               onChange={selectedColor => {
                 setActionColor(selectedColor.hex);
               }}

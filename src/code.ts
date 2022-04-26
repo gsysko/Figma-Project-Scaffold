@@ -687,35 +687,44 @@ let DARK_COLORS_FIXED = [
 ]
 
 // This shows the HTML page in "ui.html".
-figma.showUI(__html__)
-figma.ui.resize(400, 330)
-
-if(figma.root.getPluginData("status") == "run") {
-  //TODO evaluate if there is some way to reconfigure the pages after initial setup.
-  figma.ui.resize(400, 136)
-  figma.ui.postMessage("about")
+switch(figma.command){
+  case "update":
+    updateGeneratedColors("light");
+    updateGeneratedColors("dark");
+    figma.closePlugin()
+    break
+  default:
+    figma.showUI(__html__)
+    figma.ui.resize(400, 330)
+    // if(figma.root.getPluginData("status") == "run") {
+    //   //TODO evaluate if there is some way to reconfigure the pages after initial setup.
+    //   // figma.ui.resize(400, 136)
+    //   figma.ui.postMessage("about")
+    // }
+    break
 }
 
 // Calls to "parent.postMessage" from within the HTML page will trigger this
 // callback. The callback will be passed the "pluginMessage" property of the
 // posted message.
 figma.ui.onmessage = async msg => {
-  await loadResources()
   switch (msg.type) {
     case "resize":
       figma.ui.resize(400, msg.height)
       break
     case "create-project":
       figma.ui.hide()
-      await createProject(msg.projectTitle, msg.projectType, msg.projectDescription)
+      await loadResources()
       figma.root.setRelaunchData({about: "This document was formated with Ztart"})
       figma.root.setPluginData("status", "run")
+      await createProject(msg.projectTitle, msg.projectType, msg.projectDescription)
       break
     case "create-theme":
       figma.ui.hide()
-      await createTheme(msg.themeName, msg.primaryColor, msg.messageColor, msg.actionColor)
-      figma.root.setRelaunchData({update: "Update theme colors"})
+      await loadResources()
+      figma.root.setRelaunchData({update: "Regenerate accessible theme colors"})
       figma.root.setPluginData("status", "run")
+      await createTheme(msg.themeName, msg.primaryColor, msg.messageColor, msg.actionColor)
       break
   }
 }
@@ -1262,7 +1271,6 @@ function updateGeneratedColors(mode: ColorMode) {
 
   let currentActionForegroundStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "actionForeground")
   let currentActionBackgroundStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "actionBackground")
-  console.log(currentPrimaryColor);
 }
 
 async function loadResources() {
@@ -1358,9 +1366,11 @@ function HSLToRGB(hsl) {
 }
 
 function hexToRGB(hex: string) {
-  let r, g, b
-
   hex = hex.replace(/^#/, '');
+
+	if (hex.length === 3) {
+		hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+	}
 
   const number = Number.parseInt(hex, 16);
 	const red = number >> 16;
