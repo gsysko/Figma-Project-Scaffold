@@ -1211,7 +1211,7 @@ async function createMode(mode: ColorMode, themeName: string, primaryColor: stri
 
 async function createStyle(themeName: string, mode: ColorMode, colorName: string, fill: Paint, exampleTarget: FrameNode){
   let newStyle = figma.createPaintStyle()
-  newStyle.name = themeName + "(" + mode + ")/" + colorName
+  newStyle.name = themeName + " (" + mode + ")/" + colorName
   newStyle.setPluginData("colorName", colorName)
   newStyle.setPluginData("colorMode", mode)
   newStyle.paints = [fill]
