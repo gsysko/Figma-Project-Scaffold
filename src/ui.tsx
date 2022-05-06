@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import FormGeneric from './formGeneric'
 import FormTheme from './formTheme'
+import About from './about'
 
 interface IItem {
   label: string;
@@ -24,15 +25,18 @@ const items = [
   { label: 'Theme', value: 'Theme' }
 ];
 
+onmessage = (event) => {
+  if (event.data.pluginMessage == "about"){
+    root.render(<About/>);
+  }
+}
+
 const App = () => {
   const [selectedItem, setSelectedItem] = useState(items[0]);
+  const [run, setRun] = useState(false);
   function handleSubmit(e) {
     e.preventDefault();
     console.log('You clicked submit.');
-  }
-
-  function resize(height: number) {
-    parent.postMessage({ pluginMessage: { type: 'resize', height: height } }, '*');
   }
 
   return (
@@ -78,4 +82,4 @@ const App = () => {
 
 const container = document.getElementById('react-page');
 const root = createRoot(container); // createRoot(container!) if you use TypeScript
-root.render(<App />);
+root.render(<App/>);
