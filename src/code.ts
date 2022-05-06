@@ -1,4 +1,4 @@
-import { rgb, readableColor } from 'polished';
+import { rgb, hsl, readableColor } from 'polished';
 // This plugin will open a window to prompt the user to enter project details, and
 // it will then create a document structure and thumbnail.
 
@@ -9,6 +9,8 @@ import { rgb, readableColor } from 'polished';
 const TEMPLATE_CONTENTS = "c769a6265556c091cc1d8c05762c71ecbf97314b"
 const TEMPLATE_BLOCKS = "52058e4454d829872482b8551f4918cb828880d6"
 const TEMPLATE_INFO = "d45b3005516f887724940a5a10663adcff9dc4b4"
+const COMPONENT_TITLE = "dcc85144737cc8736a780b6e428a146ae4560606"
+const COMPONENT_BLOCK = "59a17c300d40d952e4025d551ef25f906d92f437"
 
 //Font styles
 const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
@@ -18,8 +20,6 @@ const PADDING_V = 40
 const SPACING = 24
 const FONT_TITLES = { family: "Menlo", style: "Regular" }
 const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
-const COMPONENT_TITLE = "dcc85144737cc8736a780b6e428a146ae4560606"
-const COMPONENT_BLOCK = "59a17c300d40d952e4025d551ef25f906d92f437"
 
 const SOLID: 'SOLID' = 'SOLID'
 const NORMAL: 'NORMAL' = 'NORMAL'
@@ -35,7 +35,6 @@ const BLACK = {
       "b": 0
   }
 }
-
 const WHITE = {
   "type": SOLID,
   "visible": true,
@@ -187,7 +186,7 @@ let LIGHT_COLORS_GENERATED = [
     }
   },
   {
-    name: "actionForeground",
+    name: "actionBackground",
     fill: {
       "type": SOLID,
       "visible": true,
@@ -201,7 +200,7 @@ let LIGHT_COLORS_GENERATED = [
     }
   },
   {
-    name: "actionBackground",
+    name: "onActionBackground",
     fill: {
       "type": SOLID,
       "visible": true,
@@ -260,7 +259,7 @@ let DARK_COLORS_GENERATED = [
     }
   },
   {
-    name: "actionForeground",
+    name: "actionBackground",
     fill: {
       "type": SOLID,
       "visible": true,
@@ -274,7 +273,7 @@ let DARK_COLORS_GENERATED = [
     }
   },
   {
-    name: "actionBackground",
+    name: "onActionBackground",
     fill: {
       "type": SOLID,
       "visible": true,
@@ -696,11 +695,16 @@ switch(figma.command){
   default:
     figma.showUI(__html__)
     figma.ui.resize(400, 330)
-    // if(figma.root.getPluginData("status") == "run") {
-    //   //TODO evaluate if there is some way to reconfigure the pages after initial setup.
-    //   // figma.ui.resize(400, 136)
-    //   figma.ui.postMessage("about")
-    // }
+    if(figma.root.getPluginData("status") == "run") {
+      //TODO evaluate if there is some way to reconfigure the pages after initial setup.
+      // figma.ui.resize(400, 136)
+      figma.ui.postMessage("about")
+    }
+    if(figma.root.getPluginData("status") == "themed") {
+      updateGeneratedColors("light");
+      updateGeneratedColors("dark");
+      figma.closePlugin()
+    }
     break
 }
 
@@ -723,7 +727,7 @@ figma.ui.onmessage = async msg => {
       figma.ui.hide()
       await loadResources()
       figma.root.setRelaunchData({update: "Regenerate accessible theme colors"})
-      figma.root.setPluginData("status", "run")
+      figma.root.setPluginData("status", "themed")
       await createTheme(msg.themeName, msg.primaryColor, msg.messageColor, msg.actionColor)
       break
   }
@@ -814,8 +818,8 @@ async function createProject(title, type, description) {
     building_block_area.layoutGrow = 0
     building_block_area.counterAxisSizingMode = "AUTO"
     building_block_area.primaryAxisSizingMode = "AUTO"
-    building_block_area.verticalPadding = 40
-    building_block_area.horizontalPadding = 40
+    building_block_area.verticalPadding = PADDING_V
+    building_block_area.horizontalPadding = PADDING_H
     building_block_area.itemSpacing = 40
     building_block_area.fills = []
     building_blocks.counterAxisSizingMode = "AUTO"
@@ -1133,6 +1137,7 @@ async function createTheme(themeName: string, primaryColor: string, messageColor
     //TODO set thumbnail BG to primary color
   })
 
+  figma.currentPage = figma.root.children[1]
   LIGHT_COLORS_CUSTOM[0].fill.color = hexToRGB(primaryColor)
   LIGHT_COLORS_CUSTOM[1].fill.color = hexToRGB(messageColor)
   LIGHT_COLORS_CUSTOM[2].fill.color = hexToRGB(actionColor)
@@ -1150,8 +1155,7 @@ async function createMode(mode: ColorMode, themeName: string, primaryColor: stri
   let modeFrame = figma.createFrame()
   modeFrame.name = (mode == "light" ? "☀️" : "☽")
   modeFrame.fills = []
-  modeFrame.primaryAxisSizingMode = "AUTO"
-  modeFrame.counterAxisSizingMode = "AUTO"
+  modeFrame.primaryAxisSizingMode, modeFrame.counterAxisSizingMode = "AUTO"
   modeFrame.layoutMode = "VERTICAL"
   modeFrame.itemSpacing = 64
   if (mode == "dark") modeFrame.x = 2080
@@ -1162,8 +1166,7 @@ async function createMode(mode: ColorMode, themeName: string, primaryColor: stri
   let colorsFrame = figma.createFrame()
   colorsFrame.name = "Colors"
   colorsFrame.fills = (mode == "light" ? [WHITE] : [BLACK])
-  colorsFrame.primaryAxisSizingMode = "AUTO"
-  colorsFrame.counterAxisSizingMode = "AUTO"
+  colorsFrame.primaryAxisSizingMode, colorsFrame.counterAxisSizingMode = "AUTO"
   colorsFrame.layoutMode = "HORIZONTAL"
   colorsFrame.verticalPadding = 120 
   colorsFrame.horizontalPadding = 120
@@ -1172,8 +1175,7 @@ async function createMode(mode: ColorMode, themeName: string, primaryColor: stri
   let customizableFrame = figma.createFrame()
   customizableFrame.name = "Fixed"
   customizableFrame.fills = []
-  customizableFrame.primaryAxisSizingMode = "AUTO"
-  customizableFrame.counterAxisSizingMode = "AUTO"
+  customizableFrame.primaryAxisSizingMode, customizableFrame.counterAxisSizingMode = "AUTO"
   customizableFrame.layoutMode = "VERTICAL"
   customizableFrame.itemSpacing = 80
   let blockInstance = (mode == "light" ? (await figma.importComponentByKeyAsync(COMPONENT_BLOCK)).createInstance() : (await figma.importComponentByKeyAsync("52b4796a679cb0e606ba878f94d6ef5b72603028")).createInstance())
@@ -1185,23 +1187,23 @@ async function createMode(mode: ColorMode, themeName: string, primaryColor: stri
   let fixedFrame = customizableFrame.clone()
   colorsFrame.appendChild(customizableFrame)
   fixedFrame.name = "Fixed"
-  fixedFrame.primaryAxisSizingMode = "AUTO"
-  fixedFrame.counterAxisSizingMode = "AUTO"
+  fixedFrame.primaryAxisSizingMode, fixedFrame.counterAxisSizingMode = "AUTO"
   fixedFrame.layoutMode = "VERTICAL"
   fixedFrame.itemSpacing = 80
   await setText(fixedFrame.findOne(node => node.type == "TEXT" && node.name == "Section name") as TextNode, "Fixed")
   colorsFrame.appendChild(fixedFrame)
 
   if(mode == "light"){
-    LIGHT_COLORS_CUSTOM.forEach(color => createStyle(themeName, "light", color.name, color.fill, customizableFrame))
-    LIGHT_COLORS_GENERATED.forEach(color => createStyle(themeName, "light", color.name, color.fill, fixedFrame))
-    updateGeneratedColors("light")
-    LIGHT_COLORS_FIXED.forEach(color => createStyle(themeName, "light", color.name, color.fill, fixedFrame))
+    //TODO need to include focus state colors
+    LIGHT_COLORS_CUSTOM.forEach(color => createStyle(themeName, mode, color.name, color.fill, customizableFrame))
+    LIGHT_COLORS_GENERATED.forEach(color => createStyle(themeName, mode, color.name, color.fill, fixedFrame))
+    updateGeneratedColors(mode)
+    LIGHT_COLORS_FIXED.forEach(color => createStyle(themeName, mode, color.name, color.fill, fixedFrame))
   } else {
-    DARK_COLORS_CUSTOM.forEach(color => createStyle(themeName, "dark", color.name, color.fill, customizableFrame))
-    DARK_COLORS_GENERATED.forEach(color => createStyle(themeName, "dark", color.name, color.fill, fixedFrame))
-    updateGeneratedColors("dark")
-    DARK_COLORS_FIXED.forEach(color => createStyle(themeName, "dark", color.name, color.fill, fixedFrame))
+    DARK_COLORS_CUSTOM.forEach(color => createStyle(themeName, mode, color.name, color.fill, customizableFrame))
+    DARK_COLORS_GENERATED.forEach(color => createStyle(themeName, mode, color.name, color.fill, fixedFrame))
+    updateGeneratedColors(mode)
+    DARK_COLORS_FIXED.forEach(color => createStyle(themeName, mode, color.name, color.fill, fixedFrame))
   }
 
   figma.root.children[1].appendChild(modeFrame)
@@ -1221,17 +1223,48 @@ async function createStyle(themeName: string, mode: ColorMode, colorName: string
   exampleFrame.counterAxisSizingMode = "AUTO"
   exampleFrame.layoutMode = "HORIZONTAL"
   exampleFrame.counterAxisAlignItems = "CENTER"
-  exampleFrame.paddingLeft = 40
-  exampleFrame.itemSpacing = 32
-  let exampleSwatch = figma.createEllipse()
-  exampleSwatch.setPluginData("colorName", colorName)
-  exampleSwatch.fillStyleId = newStyle.id
+  exampleFrame.paddingLeft = PADDING_H
+  exampleFrame.itemSpacing = SPACING
+  let swatchFrame = figma.createFrame()
+  swatchFrame.fills = []
+  let exampleColor = figma.createEllipse()
+  exampleColor.setPluginData("colorName", colorName)
+  exampleColor.fillStyleId = newStyle.id
+  swatchFrame.appendChild(exampleColor)
+  //TODO may need to implement a regex to exlude colors that coincidentally start with these letters
+  if(colorName.startsWith("on")){
+    let exampleTextColor = figma.createText()
+    exampleTextColor.fontName = FONT_TITLES
+    exampleTextColor.characters = "T"
+    exampleTextColor.fontSize = 64
+    exampleTextColor.fillStyleId = newStyle.id
+    let exampleTextColorBackgroundName = colorName.charAt(2).toLowerCase() + colorName.slice(3)
+    //TODO Null check needed?
+    let exampleStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == exampleTextColorBackgroundName)
+    exampleColor.fillStyleId = exampleStyle.id
+    swatchFrame.appendChild(exampleTextColor)
+    exampleTextColor.x = 30.5
+    exampleTextColor.y = 14
+  }
+  if (colorName.startsWith("border")) {
+    debugger
+    let exampleBorderColorBackgroundName = colorName.charAt(6).toLowerCase() + colorName.slice(7)
+    //TODO Null check needed?
+    try {
+      let exampleBackgroundStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == exampleBorderColorBackgroundName)
+      exampleColor.strokeStyleId = newStyle.id
+      exampleColor.fillStyleId = exampleBackgroundStyle.id
+      exampleColor.strokeWeight = 4
+    } catch (error) {
+      debugger
+    }
+  }
   let exampleText = figma.createText()
   exampleText.fontName = FONT_TITLES
   exampleText.fontSize = 48
   exampleText.characters = colorName
   exampleText.fillStyleId = (mode == "light" ? LIGHT_TEXT_COLOR_STYLE.id : DARK_TEXT_COLOR_STYLE.id)
-  exampleFrame.appendChild(exampleSwatch)
+  exampleFrame.appendChild(swatchFrame)
   exampleFrame.appendChild(exampleText)
   exampleTarget.appendChild(exampleFrame)
 }
@@ -1242,35 +1275,17 @@ function updateGeneratedColors(mode: ColorMode) {
   let currentActionColor = (figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "action").paints[0] as SolidPaint).color
 
   let onPrimaryStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "onPrimary")
-  let onPrimaryPaint: Paint = {
-    "type": SOLID,
-    "visible": true,
-    "opacity": 1,
-    "blendMode": NORMAL,
-    "color": getReadableColor(currentPrimaryColor)
-  }
-  onPrimaryStyle.paints = [onPrimaryPaint]
+  onPrimaryStyle.paints = [mixPaint(getAccessibleTextColor(currentPrimaryColor))]
   let onMessageStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "onMessage")
-  let onMessagePaint: Paint = {
-    "type": SOLID,
-    "visible": true,
-    "opacity": 1,
-    "blendMode": NORMAL,
-    "color": getReadableColor(currentMessageColor)
-  }
-  onMessageStyle.paints = [onMessagePaint]
+  onMessageStyle.paints = [mixPaint(getAccessibleTextColor(currentMessageColor))]
   let onActionStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "onAction")
-  let onActionPaint: Paint = {
-    "type": SOLID,
-    "visible": true,
-    "opacity": 1,
-    "blendMode": NORMAL,
-    "color": getReadableColor(currentActionColor)
-  }
-  onActionStyle.paints = [onMessagePaint]
+  onActionStyle.paints = [mixPaint(getAccessibleTextColor(currentActionColor))]
 
-  let currentActionForegroundStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "actionForeground")
-  let currentActionBackgroundStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "actionBackground")
+  let [actionForegroundColor, actionBackgroundColor] = getAccessibleForegroundAndBackgroundColors(currentActionColor, mode)
+  let actionForegroundStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "onActionBackground")
+  actionForegroundStyle.paints = [mixPaint(actionForegroundColor)]
+  let actionBackgroundStyle = figma.getLocalPaintStyles().find(style => style.getPluginData("colorMode") == mode && style.getPluginData("colorName") == "actionBackground")
+  actionBackgroundStyle.paints = [mixPaint(actionBackgroundColor)]
 }
 
 async function loadResources() {
@@ -1358,9 +1373,9 @@ function HSLToRGB(hsl) {
     r = c; g = 0; b = x;
   }
 
-  r = r + m;
-  g = g + m;
-  b = b + m;
+  r = Math.max(r + m, 0);
+  g = Math.max(g + m, 0);
+  b = Math.max(b + m, 0);
 
   return {r: r, g: g, b: b};
 }
@@ -1380,10 +1395,52 @@ function hexToRGB(hex: string) {
 	return {r: red/256, g: green/256, b: blue/256};
 }
 
-function getReadableColor(backgroundColor: RGB): RGB {
-  debugger
+function getAccessibleTextColor(backgroundColor: RGB): RGB {
+  let testHSL = hsl(360, 1, 1)
   let backgroundHex = rgb(Math.round(backgroundColor.r * 255), Math.round(backgroundColor.g * 255), Math.round(backgroundColor.b * 255))
-  let foregroundHex = readableColor(backgroundHex)
+  let backgroundHSL = RGBToHSL(backgroundColor)
+  let suggestedDarkColor = hsl({hue: backgroundHSL.hue, saturation: Math.min(backgroundHSL.saturation, 30)/100, lightness: Math.min(backgroundHSL.lightness, 20)/100})
+  let foregroundHex = readableColor(backgroundHex, suggestedDarkColor, "#fff", true)
   let foregroundColor = hexToRGB(foregroundHex)
   return foregroundColor;
+}
+
+function getAccessibleForegroundAndBackgroundColors(sourceColor: RGB, mode: ColorMode): [RGB, RGB] {
+  let sourcColorHSL = RGBToHSL(sourceColor)
+  let foregroundColor, backgroundColor
+  if(mode == 'light') {//Calculate light mode values.
+    foregroundColor = HSLToRGB({
+      hue: sourcColorHSL.hue,
+      saturation: sourcColorHSL.saturation,
+      lightness: Math.min(sourcColorHSL.lightness, 25)
+    })
+    backgroundColor = HSLToRGB({
+      hue: sourcColorHSL.hue,
+      saturation: sourcColorHSL.saturation,
+      lightness: Math.max(sourcColorHSL.lightness, 95)
+    })
+  } else {
+    //Calculate dark mode values.
+    foregroundColor = HSLToRGB({
+      hue: sourcColorHSL.hue,
+      saturation: sourcColorHSL.saturation,
+      lightness: Math.max(sourcColorHSL.lightness, 85)
+    })
+    backgroundColor = HSLToRGB({
+      hue: sourcColorHSL.hue,
+      saturation: Math.min(sourcColorHSL.saturation, 30),
+      lightness: Math.min(sourcColorHSL.lightness, 20)
+    })
+  }
+  return [foregroundColor, backgroundColor];
+}
+
+function mixPaint(color: RGB): Paint {
+  return {
+    "type": SOLID,
+    "visible": true,
+    "opacity": 1,
+    "blendMode": NORMAL,
+    "color": color
+  };
 }
