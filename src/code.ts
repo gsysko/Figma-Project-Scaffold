@@ -1247,7 +1247,6 @@ async function createStyle(themeName: string, mode: ColorMode, colorName: string
     exampleTextColor.y = 14
   }
   if (colorName.startsWith("border")) {
-    debugger
     let exampleBorderColorBackgroundName = colorName.charAt(6).toLowerCase() + colorName.slice(7)
     //TODO Null check needed?
     try {

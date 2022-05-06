@@ -1,9 +1,9 @@
 @import '../node_modules/@zendeskgarden/css-forms';
 @import '../node_modules/@zendeskgarden/css-buttons';
+@import '../node_modules/@zendeskgarden/css-bedrock';
 
 body { 
-  padding-left: 8px;
-  padding-right: 8px;
+  padding: 16px;
 }
 form {
   width: 100%;
