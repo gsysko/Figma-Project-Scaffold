@@ -920,43 +920,44 @@ function createProjectDetails(description, type) {
 
 // This function adds a thumbnail to your first page.
 async function createThumbnail(title: string, type: string) {
-  await figma.importComponentByKeyAsync("ac0b158c37de3fa8ba94d2b3801913aea262ffcb").catch(reason => {
+  let component = await figma.importComponentByKeyAsync("ac0b158c37de3fa8ba94d2b3801913aea262ffcb").catch(reason => {
     figma.notify("Annotation Kit library is required for thumbnails.")
     figma.closePlugin()
-  }).then(async component => {
-    let thumbnailFrame = figma.createFrame()
-    thumbnailFrame.name = "Thumbnail"
-    thumbnailFrame.resizeWithoutConstraints(640, 320)
-
-    if (component) {
-      let thumbnail = component.createInstance()
-      thumbnail.scaleFactor = 1/3
-      thumbnailFrame.appendChild(thumbnail)
-      figma.currentPage.appendChild(thumbnailFrame)
-
-      let label = thumbnail.findOne(node => node.name == "File Name") as TextNode
-      await figma.loadFontAsync(label.fontName as FontName).then(() => {
-        if (title !== ""){
-          label.characters = title
-        } else {
-          label.characters = "Enter title here"
-        }
-      })
-
-      let badge = thumbnail.findOne(node => node.name == "Badge" && node.type == "INSTANCE") as InstanceNode
-      let badgeText = badge.findOne(node => node.name == "Badge" && node.type == "TEXT") as TextNode
-      await figma.loadFontAsync(badgeText.fontName as FontName).then(() => {
-        badgeText.characters = type
-      })
-      if (type == "Exploration") {
-        badge.fillStyleId = (await figma.importStyleByKeyAsync("0ee1c479d3f21d475227a4520cb481bd98af5af5")).id
-      } else if (type == "Library") {
-        badge.fillStyleId = (await figma.importStyleByKeyAsync("a3aa8c64d10a0b1ee92b3dc6e5f278ac978c56cf")).id
-        badgeText.fillStyleId = (await figma.importStyleByKeyAsync("492c9645d67f026dd37c301c61577504bd7d8ad7")).id
-      }
-    }
-    figma.setFileThumbnailNodeAsync(thumbnailFrame)
   })
+  
+  let thumbnailFrame = figma.createFrame()
+  thumbnailFrame.name = "Thumbnail"
+  thumbnailFrame.resizeWithoutConstraints(640, 320)
+
+  if (component) {
+    let thumbnail = component.createInstance()
+    thumbnail.scaleFactor = 1/3
+    thumbnailFrame.appendChild(thumbnail)
+    figma.currentPage.appendChild(thumbnailFrame)
+
+    let label = thumbnail.findOne(node => node.name == "File Name") as TextNode
+    await figma.loadFontAsync(label.fontName as FontName).then(() => {
+      if (title !== ""){
+        label.characters = title
+      } else {
+        label.characters = "Enter title here"
+      }
+    })
+
+    let badge = thumbnail.findOne(node => node.name == "Badge" && node.type == "INSTANCE") as InstanceNode
+    let badgeText = badge.findOne(node => node.name == "Badge" && node.type == "TEXT") as TextNode
+    await figma.loadFontAsync(badgeText.fontName as FontName).then(() => {
+      badgeText.characters = type
+    })
+    if (type == "Exploration") {
+      badge.fillStyleId = (await figma.importStyleByKeyAsync("0ee1c479d3f21d475227a4520cb481bd98af5af5")).id
+    } else if (type == "Library") {
+      badge.fillStyleId = (await figma.importStyleByKeyAsync("a3aa8c64d10a0b1ee92b3dc6e5f278ac978c56cf")).id
+      badgeText.fillStyleId = (await figma.importStyleByKeyAsync("492c9645d67f026dd37c301c61577504bd7d8ad7")).id
+    }
+  }
+  figma.setFileThumbnailNodeAsync(thumbnailFrame)
+  return thumbnailFrame
 }
 
 // Adds a new page.
@@ -1130,11 +1131,7 @@ async function createTheme(themeName: string, primaryColor: string, messageColor
   // Set page names and renames the default "Page 1"
   if (figma.currentPage.name == "Page 1"){
     figma.currentPage.name = "Overview"
-    //Add a thumnail to the first page.
-    await createThumbnail(themeName, "Theme").then(async () => {
-      //TODO set thumbnail BG to primary color
-    })
-  }
+  } else createPage("Overview")
   createPage("Colors")
   figma.currentPage = figma.root.children[figma.root.children.length - 1]
   LIGHT_COLORS_CUSTOM[0].fill.color = hexToRGB(primaryColor)
@@ -1154,6 +1151,15 @@ async function createTheme(themeName: string, primaryColor: string, messageColor
   createPage("Images")
   figma.currentPage = figma.root.children[figma.root.children.length - 1]
   await createImages()
+
+  figma.currentPage = figma.root.findChild(page => page.name == "Overview")
+  //Add a thumnail to the first page.
+  let thumbnail = await createThumbnail(themeName, "Theme")
+  let thumbnailBG = thumbnail.findChild(node => node.name == "Thumbnail") as ComponentNode
+  let thumbnailText = thumbnail.findOne(node => node.name == "File Name") as TextNode
+  thumbnailBG.fillStyleId = figma.getLocalPaintStyles().find(style => style.getPluginData("colorName") == "primary").id
+  thumbnailText.fillStyleId = figma.getLocalPaintStyles().find(style => style.getPluginData("colorName") == "onPrimary").id
+  figma.viewport.scrollAndZoomIntoView([thumbnail])
 
   figma.closePlugin()
 }
