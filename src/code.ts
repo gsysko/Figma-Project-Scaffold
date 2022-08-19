@@ -1595,7 +1595,7 @@ function hexToRGB(hex: string) {
 	const green = (number >> 8) & 255;
 	const blue = number & 255;
 
-	return {r: red/256, g: green/256, b: blue/256};
+	return {r: red/255, g: green/255, b: blue/255};
 }
 
 function getAccessibleTextColor(backgroundColor: RGB): RGB {
@@ -1604,6 +1604,8 @@ function getAccessibleTextColor(backgroundColor: RGB): RGB {
   let backgroundHSL = RGBToHSL(backgroundColor)
   let suggestedDarkColor = hsl({hue: backgroundHSL.hue, saturation: Math.min(backgroundHSL.saturation, 30)/100, lightness: Math.min(backgroundHSL.lightness, 20)/100})
   let foregroundHex = readableColor(backgroundHex, suggestedDarkColor, "#fff", true)
+  //TODO: Here we run a second pass, to prefer white over black, if both are accessible. This should be reconciled with the admin code.
+  if (foregroundHex == "#000") {foregroundHex = readableColor(backgroundHex, "#fff", "#fff", true)}
   let foregroundColor = hexToRGB(foregroundHex)
   return foregroundColor;
 }
