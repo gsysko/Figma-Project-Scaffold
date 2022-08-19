@@ -1130,9 +1130,9 @@ async function createTheme(themeName: string, primaryColor: string, messageColor
   figma.currentPage = figma.root.children[0]
   // Set page names and renames the default "Page 1"
   if (figma.currentPage.name == "Page 1"){
-    figma.currentPage.name = "Overview"
-  } else createPage("Overview")
-  createPage("Colors")
+    figma.currentPage.name = "📖 About"
+  } else createPage("📖 About")
+  createPage("🎨 Colors")
   figma.currentPage = figma.root.children[figma.root.children.length - 1]
   LIGHT_COLORS_CUSTOM[0].fill.color = hexToRGB(primaryColor)
   LIGHT_COLORS_CUSTOM[1].fill.color = hexToRGB(messageColor)
@@ -1144,15 +1144,15 @@ async function createTheme(themeName: string, primaryColor: string, messageColor
   await createMode("dark", themeName, primaryColor, messageColor, actionColor)
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
 
-  createPage("Icons")
+  createPage("👁 Icons")
   figma.currentPage = figma.root.children[figma.root.children.length - 1]
   await createIcons()
 
-  createPage("Images")
+  createPage("🖼 Images")
   figma.currentPage = figma.root.children[figma.root.children.length - 1]
   await createImages()
 
-  figma.currentPage = figma.root.findChild(page => page.name == "Overview")
+  figma.currentPage = figma.root.findChild(page => page.name == "📖 About")
   //Add a thumnail to the first page.
   let thumbnail = await createThumbnail(themeName, "Theme")
   let thumbnailBG = thumbnail.findChild(node => node.name == "Thumbnail") as ComponentNode
