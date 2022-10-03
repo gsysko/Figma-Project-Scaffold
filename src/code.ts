@@ -52,6 +52,7 @@ var LIGHT_TEXT_COLOR_STYLE
 var DARK_TEXT_COLOR_STYLE
 
 type ColorMode = "dark" | "light"
+type Optional = "optional" | "mandatory"
 
 let LIGHT_COLORS_CUSTOM = [
   {
@@ -740,37 +741,37 @@ async function createProject(title, type, description) {
   figma.currentPage.name = "📖 About"
   switch (type) {
     case "Exploration": 
-      createPage("🤔 Problem definition")
-      createPage("🔬 Research")
-      createPage("🏝 Explorations")
-      createPage("         ↪ Solution A")
-      createPage("         ↪ Solution B")
+      await createPage("🤔 Problem definition", "optional")
+      await createPage("🔬 Research", "optional")
+      await createPage("🏝 Explorations", "optional")
+      await createPage("         ↪ Solution A", "optional")
+      await createPage("         ↪ Solution B", "optional")
       break;
     case "Product":
-      createPage("................................................................................................")
-      createPage("📐 Design Specs")
-      createPage("         ↪ Ready for dev")
-      createPage("         ↪ Shipped")
-      createPage("................................................................................................")
-      createPage("🕹 Prototypes")
-      createPage("         ↪ Prototype A")
-      createPage("................................................................................................")
-      createPage("🏝 Explorations")
-      createPage("         ↪ Exploration A")
-      createPage("................................................................................................")
-      createPage("📦 Archives")
-      createPage("         ↪ Archive A")
+      await createPage("................................................................................................")
+      await createPage("📐 Design Specs", "optional")
+      await createPage("         ↪ Ready for dev", "optional")
+      await createPage("         ↪ Shipped", "optional")
+      await createPage("................................................................................................")
+      await createPage("🕹 Prototypes", "optional")
+      await createPage("         ↪ Prototype A", "optional")
+      await createPage("................................................................................................")
+      await createPage("🏝 Explorations", "optional")
+      await createPage("         ↪ Exploration A", "optional")
+      await createPage("................................................................................................")
+      await createPage("📦 Archives", "optional")
+      await createPage("         ↪ Archive A", "optional")
       break;
     case "Library":
-      createPage("❓ How to...")
-      createPage("         ↪ Use this library")
-      createPage("         ↪ Contribute")
-      createPage("................................................................................................")
-      createPage("Component A")
-      createPage("Component B")
-      createPage("Component C")
-      createPage("................................................................................................")
-      createPage("🚧 Component template")
+      await createPage("❓ How to...")
+      await createPage("         ↪ Use this library")
+      await createPage("         ↪ Contribute")
+      await createPage("................................................................................................")
+      await createPage("Component A")
+      await createPage("Component B")
+      await createPage("Component C")
+      await createPage("................................................................................................")
+      await createPage("🚧 Component template")
       break;
   }
 
@@ -787,9 +788,7 @@ async function createProject(title, type, description) {
 
     // Prepare a component template
     //Create title
-    let title = (await figma.importComponentByKeyAsync(COMPONENT_TITLE)).createInstance()
-    title.name = "Component title"
-    setText(title.findChild(node => node.type == "TEXT") as TextNode, "Component name")
+    let title = await addTitle("Component title");
     title.resize(1280, title.height)
     title.x = 80
     title.y = 80
@@ -961,9 +960,18 @@ async function createThumbnail(title: string, type: string) {
 }
 
 // Adds a new page.
-function createPage(title: string) {
+async function createPage(title: string, optional?: Optional) {
   let page = figma.createPage()
   page.name = title
+  if (optional == "optional") {
+    let simpleTitle = title.match(/[A-z]+[\w\s]+/g)[0]
+    if(simpleTitle){
+      page.insertChild(page.children.length, await addTip(`If '${simpleTitle}' is not needed, delete this page.\n\nOtherwise, you can add your content in frames here ➡️`))
+      page.insertChild(page.children.length, await addTitle(simpleTitle))
+      page.insertChild(page.children.length, await addFrame(simpleTitle + " 1"))
+    }
+  }
+  return page
 }
 
 // Adds a section to your details frame.
@@ -1650,3 +1658,31 @@ function mixPaint(color: RGB): Paint {
     "color": color
   };
 }
+
+async function addTip(tipText: string) {
+  let stickie = await (await figma.importComponentByKeyAsync("d4df8b884dbe7ac182612b61cb2091b9244bdf67")).createInstance()
+  stickie.y = 0
+  stickie.x = 0 - 272 - 40
+  let note = stickie.findChild(node => node.name === "Note") as TextNode
+  await setText(note, tipText)
+  return stickie;
+}
+
+async function addTitle(titleText: string) {
+  let title = (await figma.importComponentByKeyAsync(COMPONENT_TITLE)).createInstance();
+  title.resize(1440, title.height);
+  title.x = 0
+  title.y = 0 - title.height - 120
+  await setText(title.findChild(node => node.type == "TEXT") as TextNode, titleText);
+  return title;
+}
+
+function addFrame(titleText: string) {
+  let frame = figma.createFrame()
+  frame.resize(1440, 1024);
+  frame.x = 0
+  frame.y = 0
+  frame.name = titleText
+  return frame;
+}
+
