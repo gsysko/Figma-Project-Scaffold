@@ -699,7 +699,6 @@ switch(figma.command){
     figma.ui.resize(400, 330)
     if(figma.root.getPluginData("status") == "run") {
       //TODO evaluate if there is some way to reconfigure the pages after initial setup.
-      // figma.ui.resize(400, 136)
       figma.ui.postMessage("about")
     }
     if(figma.root.getPluginData("status") == "themed") {
@@ -738,7 +737,11 @@ figma.ui.onmessage = async msg => {
 async function createProject(title, type, description) {
 
   // Set page names and renames the default "Page 1"
-  figma.currentPage.name = "📖 About"
+  if (figma.currentPage.name == "Page 1" && figma.currentPage.children.length == 0) {
+    figma.currentPage.name = "📖 About"
+  } else  {
+    figma.currentPage = await createPage("📖 About")
+  }
   switch (type) {
     case "Exploration": 
       await createPage("🤔 Problem definition", "optional")
@@ -776,9 +779,11 @@ async function createProject(title, type, description) {
   }
 
   //Add a thumnail to the first page.
-  await createThumbnail(title, type).then(async () => {
-    createProjectDetails(description, type)
-  })
+  try {
+      await createThumbnail(title, type).then(async () => {
+        createProjectDetails(description, type)
+      })
+  } catch (error) {console.log("Thumbnail error: " + error)}
   if (type == "Library"){
     let targets: FrameNode[] = [await createUse(), await createContribute()]
     await createHowTo(targets)
@@ -943,8 +948,8 @@ async function createThumbnail(title: string, type: string) {
       }
     })
 
-    let badge = thumbnail.findOne(node => node.name == "Badge" && node.type == "INSTANCE") as InstanceNode
-    let badgeText = badge.findOne(node => node.name == "Badge" && node.type == "TEXT") as TextNode
+    let badge = thumbnail.findOne(node => node.name.includes("Badge") && node.type == "INSTANCE") as InstanceNode
+    let badgeText = badge.findOne(node => node.name.includes("Badge") && node.type == "TEXT") as TextNode
     await figma.loadFontAsync(badgeText.fontName as FontName).then(() => {
       badgeText.characters = type
     })
@@ -1162,12 +1167,14 @@ async function createTheme(themeName: string, primaryColor: string, messageColor
 
   figma.currentPage = figma.root.findChild(page => page.name == "📖 About")
   //Add a thumnail to the first page.
-  let thumbnail = await createThumbnail(themeName, "Theme")
-  let thumbnailBG = thumbnail.findChild(node => node.name == "Thumbnail") as ComponentNode
-  let thumbnailText = thumbnail.findOne(node => node.name == "File Name") as TextNode
-  thumbnailBG.fillStyleId = figma.getLocalPaintStyles().find(style => style.getPluginData("colorName") == "primary").id
-  thumbnailText.fillStyleId = figma.getLocalPaintStyles().find(style => style.getPluginData("colorName") == "onPrimary").id
-  figma.viewport.scrollAndZoomIntoView([thumbnail])
+  try {
+      let thumbnail = await createThumbnail(themeName, "Theme")
+      let thumbnailBG = thumbnail.findChild(node => node.name == "Thumbnail") as ComponentNode
+      let thumbnailText = thumbnail.findOne(node => node.name == "File Name") as TextNode
+      thumbnailBG.fillStyleId = figma.getLocalPaintStyles().find(style => style.getPluginData("colorName") == "primary").id
+      thumbnailText.fillStyleId = figma.getLocalPaintStyles().find(style => style.getPluginData("colorName") == "onPrimary").id
+      figma.viewport.scrollAndZoomIntoView([thumbnail])
+  } catch (error) {console.log("Thumbnail error: " + error)}
 
   figma.closePlugin()
 }
@@ -1281,9 +1288,7 @@ async function createStyle(themeName: string, mode: ColorMode, colorName: string
       exampleColor.strokeStyleId = newStyle.id
       exampleColor.fillStyleId = exampleBackgroundStyle.id
       exampleColor.strokeWeight = 4
-    } catch (error) {
-      debugger
-    }
+    } catch (error) {console.log("Color error: " + error)}
   } else if (exampleTarget.name == "Customizable") {
     //If custom colors, include focus state.
     let focusName = "focused" + colorName.charAt(0).toUpperCase() + colorName.slice(1)
