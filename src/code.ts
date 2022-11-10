@@ -11,6 +11,7 @@ const TEMPLATE_BLOCKS = "52058e4454d829872482b8551f4918cb828880d6"
 const TEMPLATE_INFO = "d45b3005516f887724940a5a10663adcff9dc4b4"
 const COMPONENT_TITLE = "dcc85144737cc8736a780b6e428a146ae4560606"
 const COMPONENT_BLOCK = "59a17c300d40d952e4025d551ef25f906d92f437"
+const COMPONENT_ANALYTICS = "6441ced0350d78e4edc80a5775514e7eadf07e28"
 
 //Font styles
 const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
@@ -932,6 +933,7 @@ async function createThumbnail(title: string, type: string) {
   let thumbnailFrame = figma.createFrame()
   thumbnailFrame.name = "Thumbnail"
   thumbnailFrame.resizeWithoutConstraints(640, 320)
+  thumbnailFrame.insertChild(0, await addAnalytics())
 
   if (component) {
     let thumbnail = component.createInstance()
@@ -1689,5 +1691,11 @@ function addFrame(titleText: string) {
   frame.y = 0
   frame.name = titleText
   return frame;
+}
+
+async function addAnalytics() {
+  let clearpixel = await (await figma.importComponentByKeyAsync(COMPONENT_ANALYTICS)).createInstance()
+  clearpixel.name = "👋🏼"
+  return clearpixel
 }
 
