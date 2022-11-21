@@ -933,7 +933,7 @@ async function createThumbnail(title: string, type: string) {
   let thumbnailFrame = figma.createFrame()
   thumbnailFrame.name = "Thumbnail"
   thumbnailFrame.resizeWithoutConstraints(640, 320)
-  thumbnailFrame.insertChild(0, await addAnalytics())
+  try { thumbnailFrame.insertChild(0, await addAnalytics()) } catch(error) {console.log("Process kit error: " + error)}
 
   if (component) {
     let thumbnail = component.createInstance()
@@ -1695,7 +1695,7 @@ function addFrame(titleText: string) {
 
 async function addAnalytics() {
   let clearpixel = await (await figma.importComponentByKeyAsync(COMPONENT_ANALYTICS)).createInstance()
-  clearpixel.name = "👋🏼"
+  clearpixel.name = "⬜️"
   return clearpixel
 }
 
