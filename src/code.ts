@@ -793,11 +793,36 @@ async function createProject(title, type, description) {
     figma.currentPage = figma.root.children[figma.root.children.length-1]
 
     // Prepare a component template
+    //Create background
+    var section = figma.createSection()
+    section.resizeWithoutConstraints(1440, 1440)
+    section.name = "<Component title>"
+    section.fills = [{"type":SOLID,"visible":true,"opacity":1,"blendMode":NORMAL,"color":{"r":1,"g":1,"b":1}}]
+    //TODO: I would like to set the stroke and border radius to none, but this doesn't seem possible in the API yet.
+
     //Create title
     let title = await addTitle("Component title");
+    section.appendChild(title)
     title.resize(1280, title.height)
     title.x = 80
     title.y = 80
+
+    // Create description
+    var descriptionText = figma.createText()
+    section.appendChild(descriptionText)
+    try {
+      await figma.importStyleByKeyAsync(WEB_XXXLARGE).then(baseStyle => { descriptionText.textStyleId = baseStyle.id })
+    } catch (error) {
+      figma.notify("Font styles are missing!")
+    }
+    descriptionText.resize(1280, 88)
+    descriptionText.name = "Description"
+    descriptionText.x = 80
+    descriptionText.y = 352
+    descriptionText.autoRename = false
+    await figma.loadFontAsync(descriptionText.fontName as FontName)
+    descriptionText.textAutoResize = "HEIGHT"
+    descriptionText.characters = "Type a description of the component here, and place any components/variants in the space below ↘️"
 
     //Create building blocks area
     let building_blocks: FrameNode = figma.createFrame()
@@ -830,44 +855,18 @@ async function createProject(title, type, description) {
     building_block_area.fills = []
     building_blocks.counterAxisSizingMode = "AUTO"
 
-    //Create background
-    var background = figma.createRectangle()
-    background.resize(1440, 1440)
-    background.name = "Background"
-    background.fills = [{"type":SOLID,"visible":true,"opacity":1,"blendMode":NORMAL,"color":{"r":1,"g":1,"b":1}}]
-
-    // Create description
-    var descriptionText = figma.createText()
-    try {
-      await figma.importStyleByKeyAsync(WEB_XXXLARGE).then(baseStyle => { descriptionText.textStyleId = baseStyle.id })
-    } catch (error) {
-      figma.notify("Font styles are missing!")
-    }
-    descriptionText.resize(1280, 88)
-    descriptionText.name = "Description"
-    descriptionText.x = 80
-    descriptionText.y = 352
-    descriptionText.autoRename = false
-    await figma.loadFontAsync(descriptionText.fontName as FontName)
-    descriptionText.textAutoResize = "HEIGHT"
-    descriptionText.characters = "Type a description of the component here, and place any components/variants in the space below ↘️"
-
     figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
 
     // Then add the template to any pages with 'Component' in the title
     figma.root.findChildren(pageNode => pageNode.name.includes("Component")).forEach(pageNode => {
       pageNode.appendChild(building_blocks.clone())
-      pageNode.appendChild(background.clone())
-      pageNode.appendChild(descriptionText.clone())
-      pageNode.appendChild(title.clone())
+      pageNode.appendChild(section.clone())
       figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
     })
 
     //Clear up the "extra" template
-    title.remove()
     building_blocks.remove()
-    descriptionText.remove()
-    background.remove()
+    section.remove()
   }
   figma.currentPage = figma.root.children[0]
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
@@ -973,9 +972,9 @@ async function createPage(title: string, optional?: Optional) {
   if (optional == "optional") {
     let simpleTitle = title.match(/[A-z]+[\w\s]+/g)[0]
     if(simpleTitle){
-      page.insertChild(page.children.length, await addTip(`If '${simpleTitle}' is not needed, delete this page.\n\nOtherwise, you can add your content in frames here ➡️`))
+      page.insertChild(page.children.length, await addTip(`If '${simpleTitle}' is not needed, delete this page.\n\nOtherwise, you can add your content in sections here ➡️`))
       page.insertChild(page.children.length, await addTitle(simpleTitle))
-      page.insertChild(page.children.length, await addFrame(simpleTitle + " 1"))
+      page.insertChild(page.children.length, await addSection(simpleTitle))
     }
   }
   return page
@@ -1684,13 +1683,15 @@ async function addTitle(titleText: string) {
   return title;
 }
 
-function addFrame(titleText: string) {
-  let frame = figma.createFrame()
-  frame.resize(1440, 1024);
-  frame.x = 0
-  frame.y = 0
-  frame.name = titleText
-  return frame;
+function addSection(titleText: string) {
+  let section = figma.createSection()
+  section.fills = [{"type":SOLID,"visible":true,"opacity":1,"blendMode":NORMAL,"color":{"r":1,"g":1,"b":1}}]
+  //TODO: I would like to set the stroke and border radius to none, but this doesn't seem possible in the API yet.
+  section.resizeWithoutConstraints(1440, 1024);
+  section.x = 0
+  section.y = 0
+  section.name = titleText
+  return section;
 }
 
 async function addAnalytics() {
