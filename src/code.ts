@@ -12,6 +12,10 @@ const TEMPLATE_INFO = "d45b3005516f887724940a5a10663adcff9dc4b4"
 const COMPONENT_TITLE = "dcc85144737cc8736a780b6e428a146ae4560606"
 const COMPONENT_BLOCK = "59a17c300d40d952e4025d551ef25f906d92f437"
 const COMPONENT_ANALYTICS = "6441ced0350d78e4edc80a5775514e7eadf07e28"
+const COMPONENT_TAG_SLACK = "71da21db72cf60de2c83105045e6e1007d12312d"
+const COMPONENT_TAG_CONFULENCE = "26b3c920af05edc727905dd60bfbe80c12b03c31"
+const COMPONENT_TAG_JIRA = "df3ff6fbeac0088d43146bb28de1b8af9420a12a"
+const COMPONENT_TAG_DOCS = "ad128648b8397a62340efbe6f8577302ea576d58"
 
 //Font styles
 const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
@@ -782,7 +786,7 @@ async function createProject(title, type, description) {
   //Add a thumnail to the first page.
   try {
       await createThumbnail(title, type).then(async () => {
-        createProjectDetails(description, type)
+        await createProjectDetails(description, type)
       })
   } catch (error) {console.log("Thumbnail error: " + error)}
   if (type == "Library"){
@@ -873,7 +877,7 @@ async function createProject(title, type, description) {
   figma.closePlugin()
 }
 
-function createProjectDetails(description, type) {
+async function createProjectDetails(description, type) {
   let detailsFrame = figma.createFrame()
   detailsFrame.name = "Project details"
   detailsFrame.y = 340
@@ -885,10 +889,22 @@ function createProjectDetails(description, type) {
   detailsFrame.itemSpacing = SPACING
   figma.currentPage.appendChild(detailsFrame)
 
-  detailsFrame.appendChild(createDetail("Description", description !== "" ? description : "<Enter a description here>"))
-  detailsFrame.appendChild(createDetail("External Links", "<Add links here> →\n<E.g. Confluence> →\n<E.g. Google Doc> →"))
-  detailsFrame.appendChild(createDetail("Slack Channels", "#<channel name here>\n#<channel name here>"))
-  detailsFrame.appendChild(createDetail("Points of Contact", "Design - <link Slack profile here>\nProduct - <link Slack profile here>\nEngineering - <link Slack profile here>"))
+try {
+	  detailsFrame.appendChild(createDetail("Description", description !== "" ? description : "<Enter a description here>"))
+	  let externalSection = createDetail("External Links")
+	  externalSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_CONFULENCE)).createInstance())
+	  externalSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_JIRA)).createInstance())
+	  externalSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_DOCS)).createInstance())
+	  detailsFrame.appendChild(externalSection)
+	  let slackSection = createDetail("Slack channels")
+	  slackSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_SLACK)).createInstance())
+	  slackSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_SLACK)).createInstance())
+	  detailsFrame.appendChild(slackSection)
+	  detailsFrame.appendChild(createDetail("Points of Contact", "Design - <link Slack profile here>\nProduct - <link Slack profile here>\nEngineering - <link Slack profile here>"))
+} catch (error) {
+	figma.notify("Annotation Kit library is required for project details.")
+  console.log("Library error: " + error)
+}
 
   // Frame for wrapping the list of page examples.
   let listFrame = figma.createFrame()
@@ -981,7 +997,7 @@ async function createPage(title: string, optional?: Optional) {
 }
 
 // Adds a section to your details frame.
-function createDetail(title: string, body: string) {
+function createDetail(title: string, body?: string) {
   let detailFrame = figma.createFrame()
   detailFrame.name = title
   detailFrame.layoutMode = "VERTICAL"
@@ -995,13 +1011,14 @@ function createDetail(title: string, body: string) {
   titleText.characters = title
   titleText.layoutAlign = "STRETCH"
   detailFrame.appendChild(titleText)
-
-  let bodyText = figma.createText()
-  bodyText.fontName = FONT_BODIES
-  bodyText.fontSize = 14
-  bodyText.characters = body
-  bodyText.layoutAlign = "STRETCH"
-  detailFrame.appendChild(bodyText)
+  if(body){
+    let bodyText = figma.createText()
+    bodyText.fontName = FONT_BODIES
+    bodyText.fontSize = 14
+    bodyText.characters = body
+    bodyText.layoutAlign = "STRETCH"
+    detailFrame.appendChild(bodyText)
+  }
 
   return detailFrame
 }
