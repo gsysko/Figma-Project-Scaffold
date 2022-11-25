@@ -700,18 +700,23 @@ switch(figma.command){
     figma.closePlugin()
     break
   default:
-    figma.showUI(__html__)
-    figma.ui.resize(400, 330)
-    if(figma.root.getPluginData("status") == "run") {
-      //TODO evaluate if there is some way to reconfigure the pages after initial setup.
-      figma.ui.postMessage("about")
+    switch (figma.editorType){
+      case "figma":
+        figma.showUI(__html__)
+        figma.ui.resize(400, 330)
+        if(figma.root.getPluginData("status") == "run") {
+          //TODO evaluate if there is some way to reconfigure the pages after initial setup.
+          figma.ui.postMessage("about")
+        }
+        if(figma.root.getPluginData("status") == "themed") {
+          updateGeneratedColors("light");
+          updateGeneratedColors("dark");
+          figma.closePlugin()
+        }
+        break
+      case "figjam":
+        createThumbnail('<Your title>', "FigJam").then(() => {figma.closePlugin()})
     }
-    if(figma.root.getPluginData("status") == "themed") {
-      updateGeneratedColors("light");
-      updateGeneratedColors("dark");
-      figma.closePlugin()
-    }
-    break
 }
 
 // Calls to "parent.postMessage" from within the HTML page will trigger this
@@ -969,11 +974,18 @@ async function createThumbnail(title: string, type: string) {
     await figma.loadFontAsync(badgeText.fontName as FontName).then(() => {
       badgeText.characters = type
     })
-    if (type == "Exploration") {
-      badge.fillStyleId = (await figma.importStyleByKeyAsync("0ee1c479d3f21d475227a4520cb481bd98af5af5")).id
-    } else if (type == "Library") {
-      badge.fillStyleId = (await figma.importStyleByKeyAsync("a3aa8c64d10a0b1ee92b3dc6e5f278ac978c56cf")).id
-      badgeText.fillStyleId = (await figma.importStyleByKeyAsync("492c9645d67f026dd37c301c61577504bd7d8ad7")).id
+    switch (type) {
+      case "Exploration":
+        badge.fillStyleId = (await figma.importStyleByKeyAsync("0ee1c479d3f21d475227a4520cb481bd98af5af5")).id
+        break
+      case "Library":
+        badge.fillStyleId = (await figma.importStyleByKeyAsync("a3aa8c64d10a0b1ee92b3dc6e5f278ac978c56cf")).id
+        badgeText.fillStyleId = (await figma.importStyleByKeyAsync("492c9645d67f026dd37c301c61577504bd7d8ad7")).id
+        break
+      case "FigJam":
+        console.log(thumbnail.componentProperties)
+        thumbnail.setProperties({"File type": "FigJam file"})
+        break
     }
   }
   figma.setFileThumbnailNodeAsync(thumbnailFrame)
