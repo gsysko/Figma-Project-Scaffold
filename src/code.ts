@@ -1038,7 +1038,8 @@ async function createHowTo(targets) {
   let frame1 = await createSlideFrame(TEMPLATE_CONTENTS, "How to...", "")
   await addContent(frame1, "Use this library", targets[0])
   //TODO Add hyperlink to section in Confluence
-  await addContent(frame1, "<Link to your contribution guide>")
+  await addContent(frame1, "Contribute")
+  await addTip("Don't forget to add a link to your contribution guide in Confluence, under Product Design > Build > Tools > Figma > Team Libraries.")
 
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 }
