@@ -1476,6 +1476,38 @@ async function createIcons() {
   vectorClose.vectorPaths = [{"windingRule":"EVENODD","data":"M 4.920154094696045 0 L 5.5 0.5798457264900208 L 3.3297581672668457 2.75 L 5.5 4.920154094696045 L 4.920154094696045 5.5 L 2.75 3.3297581672668457 L 0.5798457264900208 5.5 L 0 4.920154094696045 L 2.1698317527770996 2.75 L 0 0.5798457264900208 L 0.5798457264900208 0 L 2.75 2.1698317527770996 L 4.920154094696045 0 Z"}]
   iconClose.appendChild(vectorClose)
 
+    // Create COMPONENT
+    var iconHide = figma.createComponent()
+    iconHide.resize(12.0000000000, 12.0000000000)
+    iconHide.primaryAxisSizingMode = "AUTO"
+    iconHide.name = "Hide - 12px"
+    iconHide.relativeTransform = [[1,0,76],[0,1,16]]
+    iconHide.x = 76
+    iconHide.y = 16
+    iconHide.fills = []
+    iconHide.strokeWeight = 0.5
+    iconHide.backgrounds = []
+    iconHide.expanded = false
+    iconHide.constraints = {"horizontal":"SCALE","vertical":"SCALE"}
+    iconHide.description = "[down chevron, hide]"
+    iconHide.documentationLinks = []
+    iconsFrame.appendChild(iconHide)
+  
+    // Create VECTOR
+    var vectorHide = figma.createVector()
+    vectorHide.fillStyleId = currentOnBackgroundColor.id
+    vectorHide.resize(6.0301632881, 3.4150817394)
+    vectorHide.name = "Icon"
+    vectorHide.strokes = []
+    vectorHide.strokeJoin = "ROUND"
+    vectorHide.relativeTransform = [[1,0,2.9999940395],[0,1,4.4493961334]]
+    vectorHide.x = 2.9999940395355225
+    vectorHide.y = 4.449396133422852
+    vectorHide.constraints = {"horizontal":"SCALE","vertical":"SCALE"}
+    vectorHide.vectorNetwork = {"regions":[{"windingRule":"EVENODD","loops":[[0,1,2,3,4,5,6]],"fills":[{"type":"SOLID","visible":true,"opacity":1,"blendMode":"NORMAL","color":{"r":0,"g":0,"b":0}}],"fillStyleId":"S:c2280481b2c5146e27b8bc84486bb586e93204e9,2:36"}],"segments":[{"start":0,"end":1,"tangentStart":{"x":0,"y":0},"tangentEnd":{"x":0,"y":0}},{"start":2,"end":0,"tangentStart":{"x":0.15620970726013184,"y":0.15620970726013184},"tangentEnd":{"x":-0.15620970726013184,"y":0.15620970726013184}},{"start":3,"end":2,"tangentStart":{"x":0,"y":0},"tangentEnd":{"x":0,"y":0}},{"start":4,"end":3,"tangentStart":{"x":0,"y":0},"tangentEnd":{"x":0,"y":0}},{"start":5,"end":4,"tangentStart":{"x":0,"y":0},"tangentEnd":{"x":0,"y":0}},{"start":6,"end":5,"tangentStart":{"x":0,"y":0},"tangentEnd":{"x":0,"y":0}},{"start":1,"end":6,"tangentStart":{"x":0,"y":0},"tangentEnd":{"x":0,"y":0}}],"vertices":[{"x":3.297924518585205,"y":3.297924518585205,"strokeCap":"NONE","strokeJoin":"ROUND","cornerRadius":0,"handleMirroring":"NONE"},{"x":6.030163288116455,"y":0.5656855702400208,"strokeCap":"NONE","strokeJoin":"ROUND","cornerRadius":0,"handleMirroring":"NONE"},{"x":2.73223876953125,"y":3.297924518585205,"strokeCap":"NONE","strokeJoin":"ROUND","cornerRadius":0,"handleMirroring":"NONE"},{"x":0,"y":0.5656855702400208,"strokeCap":"NONE","strokeJoin":"ROUND","cornerRadius":0,"handleMirroring":"NONE"},{"x":0.5656855702400208,"y":0,"strokeCap":"NONE","strokeJoin":"ROUND","cornerRadius":0,"handleMirroring":"NONE"},{"x":3.0150816440582275,"y":2.4493961334228516,"strokeCap":"NONE","strokeJoin":"ROUND","cornerRadius":0,"handleMirroring":"NONE"},{"x":5.4644775390625,"y":0,"strokeCap":"NONE","strokeJoin":"ROUND","cornerRadius":0,"handleMirroring":"NONE"}]}
+    vectorHide.vectorPaths = [{"windingRule":"EVENODD","data":"M 6.030163288116455 0.5656855702400208 L 3.297924518585205 3.297924518585205 C 3.1417148113250732 3.454134225845337 2.888448476791382 3.454134225845337 2.73223876953125 3.297924518585205 L 0 0.5656855702400208 L 0.5656855702400208 0 L 3.0150816440582275 2.4493961334228516 L 5.4644775390625 0 L 6.030163288116455 0.5656855702400208 Z"}]
+    iconHide.appendChild(vectorHide)
+
   let titleInstance = (await figma.importComponentByKeyAsync(COMPONENT_TITLE)).createInstance()
   await setText(titleInstance.findChild(node => node.name == "Section name") as TextNode, "Icons")
 
