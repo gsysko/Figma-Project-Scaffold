@@ -715,7 +715,11 @@ switch(figma.command){
         }
         break
       case "figjam":
-        createThumbnail('<Your title>', "FigJam").then(() => {figma.closePlugin()})
+        createThumbnail('<Your title>', "FigJam").then((thumbnail) => {
+          thumbnail.x = figma.viewport.center.x - (thumbnail.width/2)
+          thumbnail.y = figma.viewport.center.y - (thumbnail.height/2)
+          figma.closePlugin()
+        })
     }
 }
 
@@ -793,6 +797,7 @@ async function createProject(title, type, description) {
         await createProjectDetails(description, type)
       })
   } catch (error) {console.log("Thumbnail error: " + error)}
+
   if (type == "Library"){
     let targets: FrameNode[] = [await createUse()]
     await createHowTo(targets)
@@ -872,10 +877,12 @@ async function createProject(title, type, description) {
       figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
     })
 
-    //Clear up the "extra" template
+    //Clean up the "extra" template
     building_blocks.remove()
     section.remove()
   }
+
+  //Tidy up
   figma.currentPage = figma.root.children[0]
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
   figma.closePlugin()
