@@ -757,7 +757,7 @@ async function createProject(title, type, description) {
     figma.currentPage = await createPage("📖 About")
   }
   switch (type) {
-    case "Exploration": 
+    case "Playground": 
       await createPage("🤔 Problem definition", "optional")
       await createPage("🔬 Research", "optional")
       await createPage("🏝 Explorations", "optional")
@@ -933,7 +933,7 @@ try {
   // However in order to make adding one of these pages easily, we add some
   // text to our scratch page so we can copy/paste them with the proper emoji.
   switch (type) {
-    case "Exploration":
+    case "Playground":
       listFrame.appendChild(createPageExample("⏳ History"))
       listFrame.appendChild(createPageExample("✅ Next steps"))
     break
@@ -978,20 +978,18 @@ async function createThumbnail(title: string, type: string) {
 
     let badge = thumbnail.findOne(node => node.name.includes("Badge") && node.type == "INSTANCE") as InstanceNode
     let badgeText = badge.findOne(node => node.name.includes("Badge") && node.type == "TEXT") as TextNode
-    await figma.loadFontAsync(badgeText.fontName as FontName).then(() => {
-      badgeText.characters = type
-    })
     switch (type) {
-      case "Exploration":
-        badge.fillStyleId = (await figma.importStyleByKeyAsync("0ee1c479d3f21d475227a4520cb481bd98af5af5")).id
+      case "Product":
+        badge.setProperties({"Type": "Product"})
         break
       case "Library":
-        badge.fillStyleId = (await figma.importStyleByKeyAsync("a3aa8c64d10a0b1ee92b3dc6e5f278ac978c56cf")).id
-        badgeText.fillStyleId = (await figma.importStyleByKeyAsync("492c9645d67f026dd37c301c61577504bd7d8ad7")).id
+        badge.setProperties({"Type": "Library"})
+        break
+      case "Theme":
+        badge.setProperties({"Type": "Theme"})
         break
       case "FigJam":
-        console.log(thumbnail.componentProperties)
-        thumbnail.setProperties({"File type": "FigJam file"})
+        thumbnail.setProperties({"File type": "FigJam"})
         break
     }
   }
