@@ -977,16 +977,15 @@ async function createThumbnail(title: string, type: string) {
     })
 
     let badge = thumbnail.findOne(node => node.name.includes("Badge") && node.type == "INSTANCE") as InstanceNode
-    let badgeText = badge.findOne(node => node.name.includes("Badge") && node.type == "TEXT") as TextNode
     switch (type) {
       case "Product":
-        badge.setProperties({"Type": "Product"})
+        badge.setProperties({"Project type": "Product"})
         break
       case "Library":
-        badge.setProperties({"Type": "Library"})
+        badge.setProperties({"Project type": "Library"})
         break
       case "Theme":
-        badge.setProperties({"Type": "Theme"})
+        badge.setProperties({"Project type": "Theme"})
         break
       case "FigJam":
         thumbnail.setProperties({"File type": "FigJam"})
