@@ -1,11 +1,12 @@
+//We use the https://polished.js.org/ library to ensure color contrast in themes.
 import { rgb, hsl, readableColor } from 'polished';
-// This plugin will open a window to prompt the user to enter project details, and
-// it will then create a document structure and thumbnail.
-
 // This file holds the main code for the plugins. It has access to the *document*.
-// You can access browser APIs in the <script> tag inside "ui.html" which has a
-// full browser environment (see documentation).
+// This plugin will open a window to prompt the user to enter project details, and
+// it will then create a document structure and thumbnail. Projects can be of
+// types: Playground (for explorations), Product (for specs), Theme, or Library.
 
+// Component Keys
+// These constants are keys for common components that are used in our templates.
 const TEMPLATE_CONTENTS = "c769a6265556c091cc1d8c05762c71ecbf97314b"
 const TEMPLATE_BLOCKS = "52058e4454d829872482b8551f4918cb828880d6"
 const TEMPLATE_INFO = "d45b3005516f887724940a5a10663adcff9dc4b4"
@@ -17,18 +18,23 @@ const COMPONENT_TAG_CONFULENCE = "26b3c920af05edc727905dd60bfbe80c12b03c31"
 const COMPONENT_TAG_JIRA = "df3ff6fbeac0088d43146bb28de1b8af9420a12a"
 const COMPONENT_TAG_DOCS = "ad128648b8397a62340efbe6f8577302ea576d58"
 
-//Font styles
+//Font styles & families
+// These constants are keys for common font styles that are used in our templates.
 const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
-
-const PADDING_H = 40
-const PADDING_V = 40
-const SPACING = 24
 const FONT_TITLES = { family: "Menlo", style: "Regular" }
 const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
 
+
+// These constants are common spacing values that are used in our templates.
+const PADDING_H = 40
+const PADDING_V = 40
+const SPACING = 24
+
+// These constants are used for color fill properties.
 const SOLID: 'SOLID' = 'SOLID'
 const NORMAL: 'NORMAL' = 'NORMAL'
 
+// These are common colors that we may not always want tied to a Garden style.
 const BLACK = {
   "type": SOLID,
   "visible": true,
@@ -40,7 +46,6 @@ const BLACK = {
       "b": 0
   }
 }
-
 const WHITE = {
   "type": SOLID,
   "visible": true,
@@ -53,12 +58,19 @@ const WHITE = {
   }
 }
 
+// This variable is used to generate example text in a light/dark theme template.
 var LIGHT_TEXT_COLOR_STYLE
 var DARK_TEXT_COLOR_STYLE
 
+// This parameter type is used to indicate (to functions) that we are generating a
+// light or dark theme.
 type ColorMode = "dark" | "light"
+// This parameter type is used to indicate (to functions) if the page we are
+// generating is an optional one (for the designer to fill out) or a mandatory one.
 type Optional = "optional" | "mandatory"
 
+// These are the default color sets for our themes. They are broken down by light &
+// dark mode, and customizable (in Admin Center) or fixed.
 let LIGHT_COLORS_CUSTOM = [
   {
     name: "primary",
@@ -692,7 +704,8 @@ let DARK_COLORS_FIXED = [
   }
 ]
 
-// This shows the HTML page in "ui.html".
+// Start plugin logic.
+// This shows the HTML page in "ui.html" & "ui.tsx".
 switch(figma.command){
   case "update":
     updateGeneratedColors("light");
