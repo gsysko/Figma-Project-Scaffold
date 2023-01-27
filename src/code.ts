@@ -18,7 +18,7 @@ const COMPONENT_TAG_CONFULENCE = "26b3c920af05edc727905dd60bfbe80c12b03c31"
 const COMPONENT_TAG_JIRA = "df3ff6fbeac0088d43146bb28de1b8af9420a12a"
 const COMPONENT_TAG_DOCS = "ad128648b8397a62340efbe6f8577302ea576d58"
 
-//Font styles & families
+// Font styles & families
 // These constants are keys for common font styles that are used in our templates.
 const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
 const FONT_TITLES = { family: "Menlo", style: "Regular" }
@@ -704,31 +704,44 @@ let DARK_COLORS_FIXED = [
   }
 ]
 
-// Start plugin logic.
-// This shows the HTML page in "ui.html" & "ui.tsx".
+// Start plugin logic here...
+// How was the plugin launched?
 switch(figma.command){
+  //If launched by the "Update colors" relaunch button...
   case "update":
-    updateGeneratedColors("light");
-    updateGeneratedColors("dark");
+    //Update both light and dark mode colors
+    updateGeneratedColors('light');
+    updateGeneratedColors('dark');
     figma.closePlugin()
     break
+  //Else it was probably the plugin menu or quick commands...
   default:
+    //Figma file or FigJam file?
     switch (figma.editorType){
       case "figma":
+        // This shows the React app page in "ui.html" + "ui.tsx" and sizes to fit.
         figma.showUI(__html__)
         figma.ui.resize(400, 330)
-        if(figma.root.getPluginData("status") == "run") {
-          //TODO evaluate if there is some way to reconfigure the pages after initial setup.
-          figma.ui.postMessage("about")
-        }
+        // Has the plugin previously been run to create a theme (in which case we 
+        // note this by adding "status" = "themed" in the PluginData)?
         if(figma.root.getPluginData("status") == "themed") {
           updateGeneratedColors("light");
           updateGeneratedColors("dark");
           figma.closePlugin()
         }
+        // Or has the plugin previously been run to create a project (in which case 
+        // we note this by adding "status" = "run" in the PluginData)?
+        if(figma.root.getPluginData("status") == "run") {
+          // Then show the About message and option for re-running.
+          figma.ui.postMessage("about")
+        }
         break
       case "figjam":
+        // This goes ahead and just creates a FigJam file thumbnail (and doesn't
+        // launch the webview popup).
         createThumbnail('<Your title>', "FigJam").then((thumbnail) => {
+          // After creating the thumbnail center in the viewport, so the user can
+          // consider where to put it.
           thumbnail.x = figma.viewport.center.x - (thumbnail.width/2)
           thumbnail.y = figma.viewport.center.y - (thumbnail.height/2)
           figma.closePlugin()
@@ -740,10 +753,16 @@ switch(figma.command){
 // callback. The callback will be passed the "pluginMessage" property of the
 // posted message.
 figma.ui.onmessage = async msg => {
+  // If the message type is...
   switch (msg.type) {
+    // Resize the popup: We go ahead and resize the webview popup.
     case "resize":
       figma.ui.resize(400, msg.height)
       break
+    // Create a project: We dismiss the popup, get the resources we need,
+    // set relaunch data (so the user can launch the About page) and set the 
+    // "status" = "run" (so we can warn the user before re-running it). Then we
+    // create the template pages and content.
     case "create-project":
       figma.ui.hide()
       await loadResources()
@@ -751,6 +770,10 @@ figma.ui.onmessage = async msg => {
       figma.root.setPluginData("status", "run")
       await createProject(msg.projectTitle, msg.projectType, msg.projectDescription)
       break
+    // Create a theme: We dismiss the popup, get the resources we need,
+    // set relaunch data (so the user can re-run the color contrast analysis, if 
+    // they make changes) and set the "status" = "themed". Then we
+    // create the pages, color styles and content.
     case "create-theme":
       figma.ui.hide()
       await loadResources()
@@ -762,8 +785,7 @@ figma.ui.onmessage = async msg => {
 }
 
 async function createProject(title, type, description) {
-
-  // Set page names and renames the default "Page 1"
+  // Set page names and renames the default page (i.e. "Page 1").
   if (figma.currentPage.name == "Page 1" && figma.currentPage.children.length == 0) {
     figma.currentPage.name = "📖 About"
   } else  {
