@@ -21,7 +21,7 @@ const COMPONENT_TAG_DOCS = "ad128648b8397a62340efbe6f8577302ea576d58"
 // Font styles & families
 // These constants are keys for common font styles that are used in our templates.
 const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
-const FONT_TITLES = { family: "Menlo", style: "Regular" }
+const FONT_TITLES = { family: "SF Mono", style: "Regular" }
 const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
 
 
