@@ -21,6 +21,7 @@ const COMPONENT_TAG_DOCS = "ad128648b8397a62340efbe6f8577302ea576d58"
 // Font styles & families
 // These constants are keys for common font styles that are used in our templates.
 const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
+// Todo: replace with font styles
 const FONT_TITLES = { family: "SF Mono", style: "Regular" }
 const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
 
@@ -1399,12 +1400,18 @@ function updateGeneratedColors(mode: ColorMode) {
 async function loadResources() {
   // Need to load a font here to generate the about frames.
   console.log("Loading fonts...")
-  await figma.loadFontAsync(FONT_TITLES)
-  await figma.loadFontAsync(FONT_BODIES)
-
-  console.log("Loading text colors...")
-  LIGHT_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("f207233833aea62e2f0163bb4b6c6ed602459ba1")
-  DARK_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("5638e43c82613c7f15c60e3e8e9496c17763ae49")
+  try {
+    await figma.loadFontAsync(FONT_TITLES)
+    await figma.loadFontAsync(FONT_BODIES)
+  
+    console.log("Loading text colors...")
+    LIGHT_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("f207233833aea62e2f0163bb4b6c6ed602459ba1")
+    DARK_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("5638e43c82613c7f15c60e3e8e9496c17763ae49")
+  } catch (error) {
+    figma.notify("Fonts missing. Contact support.")
+    console.log("Font error: " + error)
+    figma.closePlugin()
+  }
 }
 
 async function createIcons() {
