@@ -768,6 +768,7 @@ figma.ui.onmessage = async msg => {
       await loadResources()
       figma.root.setRelaunchData({about: "This document was formated with Ztart"})
       figma.root.setPluginData("status", "run")
+      console.log("Creating project...")
       await createProject(msg.projectTitle, msg.projectType, msg.projectDescription)
       break
     // Create a theme: We dismiss the popup, get the resources we need,
@@ -786,6 +787,7 @@ figma.ui.onmessage = async msg => {
 
 async function createProject(title, type, description) {
   // Set page names and renames the default page (i.e. "Page 1").
+  console.log("Creating pages...")
   if (figma.currentPage.name == "Page 1" && figma.currentPage.children.length == 0) {
     figma.currentPage.name = "📖 About"
   } else  {
@@ -827,6 +829,7 @@ async function createProject(title, type, description) {
   }
 
   //Add a thumnail to the first page.
+  console.log("Adding thumbnail...")
   try {
       await createThumbnail(title, type).then(async () => {
         await createProjectDetails(description, type)
@@ -918,6 +921,7 @@ async function createProject(title, type, description) {
   }
 
   //Tidy up
+  console.log("Tidying up...")
   figma.currentPage = figma.root.children[0]
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
   figma.closePlugin()
@@ -1393,10 +1397,12 @@ function updateGeneratedColors(mode: ColorMode) {
 }
 
 async function loadResources() {
-  // Need to load a font here to generate the other page examples.
+  // Need to load a font here to generate the about frames.
+  console.log("Loading fonts...")
   await figma.loadFontAsync(FONT_TITLES)
   await figma.loadFontAsync(FONT_BODIES)
 
+  console.log("Loading text colors...")
   LIGHT_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("f207233833aea62e2f0163bb4b6c6ed602459ba1")
   DARK_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("5638e43c82613c7f15c60e3e8e9496c17763ae49")
 }
