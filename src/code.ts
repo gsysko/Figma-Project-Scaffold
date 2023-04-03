@@ -1,11 +1,12 @@
+//We use the https://polished.js.org/ library to ensure color contrast in themes.
 import { rgb, hsl, readableColor } from 'polished';
-// This plugin will open a window to prompt the user to enter project details, and
-// it will then create a document structure and thumbnail.
-
 // This file holds the main code for the plugins. It has access to the *document*.
-// You can access browser APIs in the <script> tag inside "ui.html" which has a
-// full browser environment (see documentation).
+// This plugin will open a window to prompt the user to enter project details, and
+// it will then create a document structure and thumbnail. Projects can be of
+// types: Playground (for explorations), Product (for specs), Theme, or Library.
 
+// Component Keys
+// These constants are keys for common components that are used in our templates.
 const TEMPLATE_CONTENTS = "c769a6265556c091cc1d8c05762c71ecbf97314b"
 const TEMPLATE_BLOCKS = "52058e4454d829872482b8551f4918cb828880d6"
 const TEMPLATE_INFO = "d45b3005516f887724940a5a10663adcff9dc4b4"
@@ -17,18 +18,24 @@ const COMPONENT_TAG_CONFULENCE = "26b3c920af05edc727905dd60bfbe80c12b03c31"
 const COMPONENT_TAG_JIRA = "df3ff6fbeac0088d43146bb28de1b8af9420a12a"
 const COMPONENT_TAG_DOCS = "ad128648b8397a62340efbe6f8577302ea576d58"
 
-//Font styles
+// Font styles & families
+// These constants are keys for common font styles that are used in our templates.
 const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
+// Todo: replace with font styles
+const FONT_TITLES = { family: "SF Mono", style: "Regular" }
+const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
 
+
+// These constants are common spacing values that are used in our templates.
 const PADDING_H = 40
 const PADDING_V = 40
 const SPACING = 24
-const FONT_TITLES = { family: "Menlo", style: "Regular" }
-const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
 
+// These constants are used for color fill properties.
 const SOLID: 'SOLID' = 'SOLID'
 const NORMAL: 'NORMAL' = 'NORMAL'
 
+// These are common colors that we may not always want tied to a Garden style.
 const BLACK = {
   "type": SOLID,
   "visible": true,
@@ -40,7 +47,6 @@ const BLACK = {
       "b": 0
   }
 }
-
 const WHITE = {
   "type": SOLID,
   "visible": true,
@@ -53,12 +59,19 @@ const WHITE = {
   }
 }
 
+// This variable is used to generate example text in a light/dark theme template.
 var LIGHT_TEXT_COLOR_STYLE
 var DARK_TEXT_COLOR_STYLE
 
+// This parameter type is used to indicate (to functions) that we are generating a
+// light or dark theme.
 type ColorMode = "dark" | "light"
+// This parameter type is used to indicate (to functions) if the page we are
+// generating is an optional one (for the designer to fill out) or a mandatory one.
 type Optional = "optional" | "mandatory"
 
+// These are the default color sets for our themes. They are broken down by light &
+// dark mode, and customizable (in Admin Center) or fixed.
 let LIGHT_COLORS_CUSTOM = [
   {
     name: "primary",
@@ -692,30 +705,44 @@ let DARK_COLORS_FIXED = [
   }
 ]
 
-// This shows the HTML page in "ui.html".
+// Start plugin logic here...
+// How was the plugin launched?
 switch(figma.command){
+  //If launched by the "Update colors" relaunch button...
   case "update":
-    updateGeneratedColors("light");
-    updateGeneratedColors("dark");
+    //Update both light and dark mode colors
+    updateGeneratedColors('light');
+    updateGeneratedColors('dark');
     figma.closePlugin()
     break
+  //Else it was probably the plugin menu or quick commands...
   default:
+    //Figma file or FigJam file?
     switch (figma.editorType){
       case "figma":
+        // This shows the React app page in "ui.html" + "ui.tsx" and sizes to fit.
         figma.showUI(__html__)
         figma.ui.resize(400, 330)
-        if(figma.root.getPluginData("status") == "run") {
-          //TODO evaluate if there is some way to reconfigure the pages after initial setup.
-          figma.ui.postMessage("about")
-        }
+        // Has the plugin previously been run to create a theme (in which case we 
+        // note this by adding "status" = "themed" in the PluginData)?
         if(figma.root.getPluginData("status") == "themed") {
           updateGeneratedColors("light");
           updateGeneratedColors("dark");
           figma.closePlugin()
         }
+        // Or has the plugin previously been run to create a project (in which case 
+        // we note this by adding "status" = "run" in the PluginData)?
+        if(figma.root.getPluginData("status") == "run") {
+          // Then show the About message and option for re-running.
+          figma.ui.postMessage("about")
+        }
         break
       case "figjam":
+        // This goes ahead and just creates a FigJam file thumbnail (and doesn't
+        // launch the webview popup).
         createThumbnail('<Your title>', "FigJam").then((thumbnail) => {
+          // After creating the thumbnail center in the viewport, so the user can
+          // consider where to put it.
           thumbnail.x = figma.viewport.center.x - (thumbnail.width/2)
           thumbnail.y = figma.viewport.center.y - (thumbnail.height/2)
           figma.closePlugin()
@@ -727,17 +754,28 @@ switch(figma.command){
 // callback. The callback will be passed the "pluginMessage" property of the
 // posted message.
 figma.ui.onmessage = async msg => {
+  // If the message type is...
   switch (msg.type) {
+    // Resize the popup: We go ahead and resize the webview popup.
     case "resize":
       figma.ui.resize(400, msg.height)
       break
+    // Create a project: We dismiss the popup, get the resources we need,
+    // set relaunch data (so the user can launch the About page) and set the 
+    // "status" = "run" (so we can warn the user before re-running it). Then we
+    // create the template pages and content.
     case "create-project":
       figma.ui.hide()
       await loadResources()
       figma.root.setRelaunchData({about: "This document was formated with Ztart"})
       figma.root.setPluginData("status", "run")
+      console.log("Creating project...")
       await createProject(msg.projectTitle, msg.projectType, msg.projectDescription)
       break
+    // Create a theme: We dismiss the popup, get the resources we need,
+    // set relaunch data (so the user can re-run the color contrast analysis, if 
+    // they make changes) and set the "status" = "themed". Then we
+    // create the pages, color styles and content.
     case "create-theme":
       figma.ui.hide()
       await loadResources()
@@ -749,8 +787,8 @@ figma.ui.onmessage = async msg => {
 }
 
 async function createProject(title, type, description) {
-
-  // Set page names and renames the default "Page 1"
+  // Set page names and renames the default page (i.e. "Page 1").
+  console.log("Creating pages...")
   if (figma.currentPage.name == "Page 1" && figma.currentPage.children.length == 0) {
     figma.currentPage.name = "📖 About"
   } else  {
@@ -792,6 +830,7 @@ async function createProject(title, type, description) {
   }
 
   //Add a thumnail to the first page.
+  console.log("Adding thumbnail...")
   try {
       await createThumbnail(title, type).then(async () => {
         await createProjectDetails(description, type)
@@ -883,6 +922,7 @@ async function createProject(title, type, description) {
   }
 
   //Tidy up
+  console.log("Tidying up...")
   figma.currentPage = figma.root.children[0]
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children)
   figma.closePlugin()
@@ -1358,12 +1398,20 @@ function updateGeneratedColors(mode: ColorMode) {
 }
 
 async function loadResources() {
-  // Need to load a font here to generate the other page examples.
-  await figma.loadFontAsync(FONT_TITLES)
-  await figma.loadFontAsync(FONT_BODIES)
-
-  LIGHT_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("f207233833aea62e2f0163bb4b6c6ed602459ba1")
-  DARK_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("5638e43c82613c7f15c60e3e8e9496c17763ae49")
+  // Need to load a font here to generate the about frames.
+  console.log("Loading fonts...")
+  try {
+    await figma.loadFontAsync(FONT_TITLES)
+    await figma.loadFontAsync(FONT_BODIES)
+  
+    console.log("Loading text colors...")
+    LIGHT_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("f207233833aea62e2f0163bb4b6c6ed602459ba1")
+    DARK_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("5638e43c82613c7f15c60e3e8e9496c17763ae49")
+  } catch (error) {
+    figma.notify("Fonts missing. Contact support.")
+    console.log("Font error: " + error)
+    figma.closePlugin()
+  }
 }
 
 async function createIcons() {
