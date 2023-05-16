@@ -797,6 +797,7 @@ async function createProject(title, type, description) {
   } else  {
     figma.currentPage = await createPage("📖 About")
   }
+  //TODO Remove playground type
   switch (type) {
     case "Playground": 
       await createPage("🤔 Problem definition", "optional")
@@ -938,7 +939,6 @@ async function createProjectDetails(description, type) {
       overview.y = 360
       overview.resize(640, overview.height)
     
-      debugger
       let descriptionNotes = overview.findOne(node => node.name == "Notes" && node.type == "TEXT") as TextNode
       descriptionNotes.characters = description
     
@@ -988,13 +988,33 @@ async function createThumbnail(title: string, type: string) {
 
     let badge = thumbnail.findOne(node => node.name.includes("Badge") && node.type == "INSTANCE") as InstanceNode
     switch (type) {
+      case "Playground":
+        thumbnail.setProperties({
+          "Show project type#3022:9": true
+        })
+        badge.setProperties({"Project type": "Playground"})
+        break
       case "Product":
         badge.setProperties({"Project type": "Product"})
         break
       case "Library":
+        thumbnail.setProperties({
+          "Show project type#3022:9": true,
+          "Show summary#3022:0": true,
+          "Show point of contact#3022:3": false,
+          "Show date last active#3022:6": false,
+          "Show image#2502:3": true
+        })
         badge.setProperties({"Project type": "Library"})
         break
       case "Theme":
+        thumbnail.setProperties({
+          "Show project type#3022:9": true,
+          "Show summary#3022:0": false,
+          "Show point of contact#3022:3": false,
+          "Show date last active#3022:6": false,
+          "Show image#2502:3": false
+        })
         badge.setProperties({"Project type": "Theme"})
         break
       case "FigJam":
@@ -1021,42 +1041,6 @@ async function createPage(title: string, optional?: Optional) {
   return page
 }
 
-// Adds a section to your details frame.
-function createDetail(title: string, body?: string) {
-  let detailFrame = figma.createFrame()
-  detailFrame.name = title
-  detailFrame.layoutMode = "VERTICAL"
-  detailFrame.counterAxisSizingMode = "AUTO"
-  detailFrame.layoutAlign = "STRETCH"
-  detailFrame.itemSpacing = 8
-
-  let titleText = figma.createText()
-  titleText.fontName = FONT_TITLES
-  titleText.fontSize = 17
-  titleText.characters = title
-  titleText.layoutAlign = "STRETCH"
-  detailFrame.appendChild(titleText)
-  if(body){
-    let bodyText = figma.createText()
-    bodyText.fontName = FONT_BODIES
-    bodyText.fontSize = 14
-    bodyText.characters = body
-    bodyText.layoutAlign = "STRETCH"
-    detailFrame.appendChild(bodyText)
-  }
-
-  return detailFrame
-}
-
-// Adds an example to your list frame.
-function createPageExample(text: string) {
-  let linkLabel = figma.createText()
-  linkLabel.fontName = FONT_BODIES
-  linkLabel.fontSize = 14
-  linkLabel.characters = text
-  return linkLabel
-}
-
 async function createHowTo(targets) {
   let howPage = figma.root.children.find(node => node.name == "❓ How to...")
   figma.currentPage = howPage
@@ -1069,7 +1053,6 @@ async function createHowTo(targets) {
 
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 }
-
 
 async function createUse() {
   let usePage = figma.root.children.find(node => node.name == "         ↪ Use this library")
