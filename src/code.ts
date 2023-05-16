@@ -17,6 +17,9 @@ const COMPONENT_TAG_SLACK = "71da21db72cf60de2c83105045e6e1007d12312d"
 const COMPONENT_TAG_CONFULENCE = "26b3c920af05edc727905dd60bfbe80c12b03c31"
 const COMPONENT_TAG_JIRA = "df3ff6fbeac0088d43146bb28de1b8af9420a12a"
 const COMPONENT_TAG_DOCS = "ad128648b8397a62340efbe6f8577302ea576d58"
+const COMPONENT_STICKY_BIG = "d4df8b884dbe7ac182612b61cb2091b9244bdf67"
+const COMPONENT_STICKY_AUTO = "d55402669835389c69fb45347b410b8600d8d5ab"
+const COMPONENT_CONTEXT_OVERVIEW = "570f73267b59459e05f95d946262065e08115263"
 
 // Font styles & families
 // These constants are keys for common font styles that are used in our templates.
@@ -803,18 +806,18 @@ async function createProject(title, type, description) {
       await createPage("         ↪ Solution B", "optional")
       break;
     case "Product":
-      await createPage("🔭 Discovery ....................................................................................")
-      await createPage("         ↪ Context")
-      await createPage("         ↪ Competitive reference")
-      await createPage("🏝 Explorations ................................................................................")
+      await createPage("🔭 Discovery .........................................................................")
+      await createPage("         ↪ Context", "optional")
+      await createPage("         ↪ Competitor reference", "optional")
+      await createPage("🏝 Explorations .......................................................................")
       await createPage("         ↪ Feature A [WIP]", "optional")
       await createPage("         ↪ Feature A [Content]", "optional")
-      await createPage("📐 Specs ........................................................................................")
+      await createPage("📐 Specs .................................................................................")
       await createPage("         ↪ Feature B [In review]", "optional")
       await createPage("         ↪ Feature C [Shipped]", "optional")
-      await createPage("🕹 Prototypes ....................................................................................")
+      await createPage("🕹 Prototypes ........................................................................")
       await createPage("         ↪ Prototype D", "optional")
-      await createPage("📦 Archives .....................................................................................")
+      await createPage("📦 Archives .............................................................................")
       await createPage("         ↪ Archive E", "optional")
       break;
     case "Library":
@@ -834,6 +837,7 @@ async function createProject(title, type, description) {
   try {
       await createThumbnail(title, type).then(async () => {
         await createProjectDetails(description, type)
+        await addTip("Duplicate this template by selecting ‘Duplicate to your drafts’ and then ‘Move to project...’ from the 􀄀 chevron menu at the top of the screen.\n\n(P.S. Don’t forget to delete these helper stickies after.)")
       })
   } catch (error) {console.log("Thumbnail error: " + error)}
 
@@ -929,62 +933,19 @@ async function createProject(title, type, description) {
 }
 
 async function createProjectDetails(description, type) {
-  let detailsFrame = figma.createFrame()
-  detailsFrame.name = "Project details"
-  detailsFrame.y = 340
-  detailsFrame.resizeWithoutConstraints(640, 1)
-  detailsFrame.layoutMode = "VERTICAL"
-  detailsFrame.counterAxisSizingMode = "FIXED"
-  detailsFrame.verticalPadding = PADDING_V
-  detailsFrame.horizontalPadding = PADDING_H
-  detailsFrame.itemSpacing = SPACING
-  figma.currentPage.appendChild(detailsFrame)
-
-try {
-	  detailsFrame.appendChild(createDetail("Description", description !== "" ? description : "<Enter a description here>"))
-	  let externalSection = createDetail("External Links")
-	  externalSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_CONFULENCE)).createInstance())
-	  externalSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_JIRA)).createInstance())
-	  externalSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_DOCS)).createInstance())
-	  detailsFrame.appendChild(externalSection)
-	  let slackSection = createDetail("Slack channels")
-	  slackSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_SLACK)).createInstance())
-	  slackSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_SLACK)).createInstance())
-	  detailsFrame.appendChild(slackSection)
-	  detailsFrame.appendChild(createDetail("Points of Contact", "Design - <link Slack profile here>\nProduct - <link Slack profile here>\nEngineering - <link Slack profile here>"))
-} catch (error) {
-	figma.notify("Annotation Kit library is required for project details.")
-  console.log("Library error: " + error)
-}
-
-  // Frame for wrapping the list of page examples.
-  let listFrame = figma.createFrame()
-  listFrame.name = "Add other pages, as needed..."
-  listFrame.y = detailsFrame.y + detailsFrame.height + SPACING
-  listFrame.resizeWithoutConstraints(640, 1)
-  listFrame.layoutMode = "VERTICAL"
-  listFrame.counterAxisSizingMode = "FIXED"
-  listFrame.verticalPadding = PADDING_V
-  listFrame.horizontalPadding = PADDING_H
-  listFrame.itemSpacing = 8
-  figma.currentPage.appendChild(listFrame)
-
-  // Not all projects need a prototype, shipped it/released, or research page.
-  // However in order to make adding one of these pages easily, we add some
-  // text to our scratch page so we can copy/paste them with the proper emoji.
-  switch (type) {
-    case "Playground":
-      listFrame.appendChild(createPageExample("⏳ History"))
-      listFrame.appendChild(createPageExample("✅ Next steps"))
-    break
-    case "Product":
-      listFrame.appendChild(createPageExample("💅🏽 Styles"))
-      listFrame.appendChild(createPageExample("⚙️ Components"))
-    break
-    case "Library":
-      listFrame.appendChild(createPageExample("💅🏽 Styles"))
-      listFrame.appendChild(createPageExample("🚀 Roadmap"))
-    break
+  try {
+      let overview = (await figma.importComponentByKeyAsync(COMPONENT_CONTEXT_OVERVIEW)).createInstance()
+      overview.y = 360
+      overview.resize(640, overview.height)
+    
+      debugger
+      let descriptionNotes = overview.findOne(node => node.name == "Notes" && node.type == "TEXT") as TextNode
+      descriptionNotes.characters = description
+    
+      figma.currentPage.appendChild(overview)
+  } catch (error) {
+    figma.notify("Annotation Kit library is required for project details.")
+    console.log("Library error: " + error)
   }
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 }
@@ -1009,10 +970,11 @@ async function createThumbnail(title: string, type: string) {
 
     //TODO Set component properties to hide the type and show the POC and date
     thumbnail.setProperties({
-      "Show project type": false,
-      "Show summary": true,
-      "Show point of contact": true,
-      "Show date last active": true
+      "Show project type#3022:9": false,
+      "Show summary#3022:0": true,
+      "Show point of contact#3022:3": true,
+      "Show date last active#3022:6": true,
+      "Show image#2502:3": true
     })
 
     let label = thumbnail.findOne(node => node.name == "File Name") as TextNode
@@ -1176,7 +1138,7 @@ async function createSlideFrame(id: string, supertitleText: string, titleText?: 
   figma.currentPage.insertChild(figma.currentPage.children.length, frame1)
 
   if (instructionText){
-    let stickie = await (await figma.importComponentByKeyAsync("d4df8b884dbe7ac182612b61cb2091b9244bdf67")).createInstance()
+    let stickie = await (await figma.importComponentByKeyAsync(COMPONENT_STICKY_BIG)).createInstance()
     stickie.y = frame1.y
     stickie.x = frame1.x - 40 - 272
     let note = stickie.findChild(node => node.name === "Note") as TextNode
@@ -1774,7 +1736,8 @@ function mixPaint(color: RGB): Paint {
 }
 
 async function addTip(tipText: string) {
-  let stickie = await (await figma.importComponentByKeyAsync("d4df8b884dbe7ac182612b61cb2091b9244bdf67")).createInstance()
+  let stickie = await (await figma.importComponentByKeyAsync(COMPONENT_STICKY_AUTO)).createInstance()
+  stickie.resize(272, stickie.height)
   stickie.y = 0
   stickie.x = 0 - 272 - 40
   let note = stickie.findChild(node => node.name === "Note") as TextNode
