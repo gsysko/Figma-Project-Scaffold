@@ -803,19 +803,19 @@ async function createProject(title, type, description) {
       await createPage("         ↪ Solution B", "optional")
       break;
     case "Product":
-      await createPage("................................................................................................")
-      await createPage("📐 Design Specs", "optional")
-      await createPage("         ↪ Ready for dev", "optional")
-      await createPage("         ↪ Shipped", "optional")
-      await createPage("................................................................................................")
-      await createPage("🕹 Prototypes", "optional")
-      await createPage("         ↪ Prototype A", "optional")
-      await createPage("................................................................................................")
-      await createPage("🏝 Explorations", "optional")
-      await createPage("         ↪ Exploration A", "optional")
-      await createPage("................................................................................................")
-      await createPage("📦 Archives", "optional")
-      await createPage("         ↪ Archive A", "optional")
+      await createPage("🔭 Discovery ....................................................................................")
+      await createPage("         ↪ Context")
+      await createPage("         ↪ Competitive reference")
+      await createPage("🏝 Explorations ................................................................................")
+      await createPage("         ↪ Feature A [WIP]", "optional")
+      await createPage("         ↪ Feature A [Content]", "optional")
+      await createPage("📐 Specs ........................................................................................")
+      await createPage("         ↪ Feature B [In review]", "optional")
+      await createPage("         ↪ Feature C [Shipped]", "optional")
+      await createPage("🕹 Prototypes ....................................................................................")
+      await createPage("         ↪ Prototype D", "optional")
+      await createPage("📦 Archives .....................................................................................")
+      await createPage("         ↪ Archive E", "optional")
       break;
     case "Library":
       await createPage("❓ How to...")
@@ -1006,6 +1006,14 @@ async function createThumbnail(title: string, type: string) {
     thumbnail.scaleFactor = 1/3
     thumbnailFrame.appendChild(thumbnail)
     figma.currentPage.appendChild(thumbnailFrame)
+
+    //TODO Set component properties to hide the type and show the POC and date
+    thumbnail.setProperties({
+      "Show project type": false,
+      "Show summary": true,
+      "Show point of contact": true,
+      "Show date last active": true
+    })
 
     let label = thumbnail.findOne(node => node.name == "File Name") as TextNode
     await figma.loadFontAsync(label.fontName as FontName).then(() => {
