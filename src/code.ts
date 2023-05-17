@@ -1,9 +1,7 @@
 //We use the https://polished.js.org/ library to ensure color contrast in themes.
 import { rgb, hsl, readableColor } from 'polished';
 // This file holds the main code for the plugins. It has access to the *document*.
-// This plugin will open a window to prompt the user to enter project details, and
-// it will then create a document structure and thumbnail. Projects can be of
-// types: Playground (for explorations), Product (for specs), Theme, or Library.
+// This plugin will open a window to prompt the user to enter project details, and it will then create a document structure and thumbnail. Projects can be of types: Playground (for explorations), Product (for specs), Theme, or Library.
 
 // Component Keys
 // These constants are keys for common components that are used in our templates.
@@ -20,6 +18,14 @@ const COMPONENT_TAG_DOCS = "ad128648b8397a62340efbe6f8577302ea576d58"
 const COMPONENT_STICKY_BIG = "d4df8b884dbe7ac182612b61cb2091b9244bdf67"
 const COMPONENT_STICKY_AUTO = "d55402669835389c69fb45347b410b8600d8d5ab"
 const COMPONENT_CONTEXT_OVERVIEW = "570f73267b59459e05f95d946262065e08115263"
+const COMPONENT_TEMPLATE_CONTEXT = "3debbe59ac381e8212b48b08a830fb608ce9de50"
+const COMPONENT_TEMPLATE_COMPETITOR = "d9cd3a6f249d15f18f41776203f7460e6efcdd52"
+const COMPONENT_TEMPLATE_EXPLORATION = "cd82358b969b8867a219d841d249685e5d4dba4c"
+const COMPONENT_TEMPLATE_CONTENT = "c74b5a975f0b949a522777e0342188a4f85bc042"
+const COMPONENT_TEMPLATE_WIP = "8d1e4952702d2f2d2a1108448f758bbea6756884"
+const COMPONENT_TEMPLATE_SHIPPED = "b56fdb22614c9d00af79696ba0df531dd8335974"
+const COMPONENT_TEMPLATE_PROTOTYPE = "ea2bd9b092c01d48b6e9e4633dcd5144551532e9"
+const COMPONENT_TEMPLATE_ARCHIVE = "136f0c6a6b8ff90a58f149c7bcc097d7db5e3e95"
 
 // Font styles & families
 // These constants are keys for common font styles that are used in our templates.
@@ -808,18 +814,18 @@ async function createProject(title, type, description) {
       break;
     case "Product":
       await createPage("🔭 Discovery .........................................................................")
-      await createPage("         ↪ Context", "optional")
-      await createPage("         ↪ Competitor reference", "optional")
+      await createPage("         ↪ Context").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTEXT) })
+      await createPage("         ↪ Competitor reference").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_COMPETITOR) })
       await createPage("🏝 Explorations .......................................................................")
-      await createPage("         ↪ Feature A [WIP]", "optional")
-      await createPage("         ↪ Feature A [Content]", "optional")
+      await createPage("         ↪ Feature A [In progress]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_EXPLORATION) })
+      await createPage("         ↪ Feature A [Content]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTENT) })
       await createPage("📐 Specs .................................................................................")
-      await createPage("         ↪ Feature B [In review]", "optional")
-      await createPage("         ↪ Feature C [Shipped]", "optional")
+      await createPage("         ↪ Feature B [In review]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_WIP) })
+      await createPage("         ↪ Feature C [Shipped]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_SHIPPED) })
       await createPage("🕹 Prototypes ........................................................................")
-      await createPage("         ↪ Prototype D", "optional")
+      await createPage("         ↪ Prototype D").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_PROTOTYPE) })
       await createPage("📦 Archives .............................................................................")
-      await createPage("         ↪ Archive E", "optional")
+      await createPage("         ↪ Archive E").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_ARCHIVE) })
       break;
     case "Library":
       await createPage("❓ How to...")
@@ -838,7 +844,7 @@ async function createProject(title, type, description) {
   try {
       await createThumbnail(title, type).then(async () => {
         await createProjectDetails(description, type)
-        await addTip("Duplicate this template by selecting ‘Duplicate to your drafts’ and then ‘Move to project...’ from the 􀄀 chevron menu at the top of the screen.\n\n(P.S. Don’t forget to delete these helper stickies after.)")
+        await addTip("You can modify the template as much as needed, but we recommend always including a thumbnail to help others find your work\n\n(P.S. Don’t forget to delete these helper stickies after.)")
       })
   } catch (error) {console.log("Thumbnail error: " + error)}
 
@@ -1039,6 +1045,21 @@ async function createPage(title: string, optional?: Optional) {
     }
   }
   return page
+}
+
+async function createFromTemplate(targetPage, templateKey) {
+  try {
+      let template = (await figma.importComponentByKeyAsync(templateKey)).createInstance().detachInstance()
+      template.children.forEach(child => {
+        child.x = child.x - 312
+        child.y = child.y - 352
+        targetPage.appendChild(child)
+      })
+      template.remove()
+  } catch (error) {
+    figma.notify("Process Kit library is required for page contents.")
+    console.log("Library error: " + error)
+  }
 }
 
 async function createHowTo(targets) {
