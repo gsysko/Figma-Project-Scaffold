@@ -813,19 +813,21 @@ async function createProject(title, type, description) {
       await createPage("         ↪ Solution B", "optional")
       break;
     case "Product":
-      await createPage("🔭 Discovery .........................................................................")
-      await createPage("         ↪ Context").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTEXT) })
-      await createPage("         ↪ Competitor reference").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_COMPETITOR) })
-      await createPage("🏝 Explorations .......................................................................")
-      await createPage("         ↪ Feature A [In progress]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_EXPLORATION) })
-      await createPage("         ↪ Feature A [Content]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTENT) })
-      await createPage("📐 Specs .................................................................................")
-      await createPage("         ↪ Feature B [In review]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_WIP) })
-      await createPage("         ↪ Feature C [Shipped]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_SHIPPED) })
-      await createPage("🕹 Prototypes ........................................................................")
-      await createPage("         ↪ Prototype D").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_PROTOTYPE) })
-      await createPage("📦 Archives .............................................................................")
-      await createPage("         ↪ Archive E").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_ARCHIVE) })
+      Promise.all([
+        createPage("🔭 Discovery ........................................................................."),
+        createPage("         ↪ Context").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTEXT) }),
+        createPage("         ↪ Competitor reference").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_COMPETITOR) }),
+        createPage("🏝 Explorations ......................................................................."),
+        createPage("         ↪ Feature A [In progress]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_EXPLORATION) }),
+        createPage("         ↪ Feature A [Content]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTENT) }),
+        createPage("📐 Specs ................................................................................."),
+        createPage("         ↪ Feature B [In review]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_WIP) }),
+        createPage("         ↪ Feature C [Shipped]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_SHIPPED) }),
+        createPage("🕹 Prototypes ........................................................................"),
+        createPage("         ↪ Prototype D").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_PROTOTYPE) }),
+        createPage("📦 Archives ............................................................................."),
+        createPage("         ↪ Archive E").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_ARCHIVE) })
+      ])
       break;
     case "Library":
       await createPage("❓ How to...")
@@ -839,17 +841,13 @@ async function createProject(title, type, description) {
       break;
   }
 
-  // Add a thumnail to the first page.
-  console.log("Adding thumbnail...")
-  try {
-      await createThumbnail(title, type).then(async () => {
-        console.log("Adding project details...")
-        await createProjectDetails(description, type)
-
-        console.log("Adding tip...")
-        await addTip("Modify the template as much as needed to fit your process, but we do recommend always including a thumbnail to help others find your work\n\n(P.S. Don’t forget to delete these helper stickies after.)")
-      })
-  } catch (error) {console.log("Thumbnail error: " + error)}
+  await Promise.allSettled([createThumbnail(title, type),
+    createProjectDetails(description, type),
+    addTip("Modify the template as much as needed to fit your process, but we do recommend always including a thumbnail to help others find your work\n\n(P.S. Don’t forget to delete these helper stickies after.)")
+    ]).catch(reason => {
+      figma.notify("Something went wrong.")
+      console.log("Library error: " + reason)
+    })
 
   if (type == "Library"){
     let targets: FrameNode[] = [await createUse()]
