@@ -34,7 +34,6 @@ const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
 const FONT_TITLES = { family: "SF Mono", style: "Regular" }
 const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
 
-
 // These constants are common spacing values that are used in our templates.
 const PADDING_H = 40
 const PADDING_V = 40
@@ -803,6 +802,7 @@ async function createProject(title, type, description) {
   } else  {
     figma.currentPage = await createPage("📖 About")
   }
+
   //TODO Remove playground type
   switch (type) {
     case "Playground": 
@@ -839,12 +839,15 @@ async function createProject(title, type, description) {
       break;
   }
 
-  //Add a thumnail to the first page.
+  // Add a thumnail to the first page.
   console.log("Adding thumbnail...")
   try {
       await createThumbnail(title, type).then(async () => {
+        console.log("Adding project details...")
         await createProjectDetails(description, type)
-        await addTip("You can modify the template as much as needed, but we recommend always including a thumbnail to help others find your work\n\n(P.S. Don’t forget to delete these helper stickies after.)")
+
+        console.log("Adding tip...")
+        await addTip("Modify the template as much as needed to fit your process, but we do recommend always including a thumbnail to help others find your work\n\n(P.S. Don’t forget to delete these helper stickies after.)")
       })
   } catch (error) {console.log("Thumbnail error: " + error)}
 
@@ -974,7 +977,6 @@ async function createThumbnail(title: string, type: string) {
     thumbnailFrame.appendChild(thumbnail)
     figma.currentPage.appendChild(thumbnailFrame)
 
-    //TODO Set component properties to hide the type and show the POC and date
     thumbnail.setProperties({
       "Show project type#3022:9": false,
       "Show summary#3022:0": true,
@@ -1047,7 +1049,9 @@ async function createPage(title: string, optional?: Optional) {
   return page
 }
 
-async function createFromTemplate(targetPage, templateKey) {
+async function createFromTemplate(targetPage: PageNode, templateKey) {
+  console.log("Building... " + targetPage.name);
+  
   try {
       let template = (await figma.importComponentByKeyAsync(templateKey)).createInstance().detachInstance()
       template.children.forEach(child => {
