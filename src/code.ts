@@ -8,6 +8,7 @@ import { rgb, hsl, readableColor } from 'polished';
 const TEMPLATE_CONTENTS = "c769a6265556c091cc1d8c05762c71ecbf97314b"
 const TEMPLATE_BLOCKS = "52058e4454d829872482b8551f4918cb828880d6"
 const TEMPLATE_INFO = "d45b3005516f887724940a5a10663adcff9dc4b4"
+const COMPONENT_THUMBNAIL = "ac0b158c37de3fa8ba94d2b3801913aea262ffcb";
 const COMPONENT_TITLE = "dcc85144737cc8736a780b6e428a146ae4560606"
 const COMPONENT_BLOCK = "59a17c300d40d952e4025d551ef25f906d92f437"
 const COMPONENT_ANALYTICS = "6441ced0350d78e4edc80a5775514e7eadf07e28"
@@ -744,6 +745,7 @@ switch(figma.command){
           // Then show the About message and option for re-running.
           figma.ui.postMessage("about")
         }
+        loadResources();
         break
       case "figjam":
         // This goes ahead and just creates a FigJam file thumbnail (and doesn't
@@ -774,7 +776,7 @@ figma.ui.onmessage = async msg => {
     // create the template pages and content.
     case "create-project":
       figma.ui.hide()
-      await loadResources()
+      // await loadResources()
       figma.root.setRelaunchData({about: "This document was formated with Ztart"})
       figma.root.setPluginData("status", "run")
       console.log("Creating project...")
@@ -786,7 +788,7 @@ figma.ui.onmessage = async msg => {
     // create the pages, color styles and content.
     case "create-theme":
       figma.ui.hide()
-      await loadResources()
+      // await loadResources()
       figma.root.setRelaunchData({update: "Regenerate accessible theme colors"})
       figma.root.setPluginData("status", "themed")
       await createTheme(msg.themeName, msg.primaryColor, msg.messageColor, msg.actionColor)
@@ -813,19 +815,21 @@ async function createProject(title, type, description) {
       await createPage("         ↪ Solution B", "optional")
       break;
     case "Product":
-      await createPage("🔭 Discovery .........................................................................")
-      await createPage("         ↪ Context").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTEXT) })
-      await createPage("         ↪ Competitor reference").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_COMPETITOR) })
-      await createPage("🏝 Explorations .......................................................................")
-      await createPage("         ↪ Feature A [In progress]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_EXPLORATION) })
-      await createPage("         ↪ Feature A [Content]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTENT) })
-      await createPage("📐 Specs .................................................................................")
-      await createPage("         ↪ Feature B [In review]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_WIP) })
-      await createPage("         ↪ Feature C [Shipped]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_SHIPPED) })
-      await createPage("🕹 Prototypes ........................................................................")
-      await createPage("         ↪ Prototype D").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_PROTOTYPE) })
-      await createPage("📦 Archives .............................................................................")
-      await createPage("         ↪ Archive E").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_ARCHIVE) })
+      await Promise.all([
+        createPage("🔭 Discovery ........................................................................."),
+        createPage("         ↪ Context").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTEXT) }),
+        createPage("         ↪ Competitor reference").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_COMPETITOR) }),
+        createPage("🏝 Explorations ......................................................................."),
+        createPage("         ↪ Feature A [In progress]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_EXPLORATION) }),
+        createPage("         ↪ Feature A [Content]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTENT) }),
+        createPage("📐 Specs ................................................................................."),
+        createPage("         ↪ Feature B [In review]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_WIP) }),
+        createPage("         ↪ Feature C [Shipped]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_SHIPPED) }),
+        createPage("🕹 Prototypes ........................................................................"),
+        createPage("         ↪ Prototype D").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_PROTOTYPE) }),
+        createPage("📦 Archives ............................................................................."),
+        createPage("         ↪ Archive E").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_ARCHIVE) })
+      ])
       break;
     case "Library":
       await createPage("❓ How to...")
@@ -839,17 +843,14 @@ async function createProject(title, type, description) {
       break;
   }
 
-  // Add a thumnail to the first page.
-  console.log("Adding thumbnail...")
-  try {
-      await createThumbnail(title, type).then(async () => {
-        console.log("Adding project details...")
-        await createProjectDetails(description, type)
-
-        console.log("Adding tip...")
-        await addTip("Modify the template as much as needed to fit your process, but we do recommend always including a thumbnail to help others find your work\n\n(P.S. Don’t forget to delete these helper stickies after.)")
-      })
-  } catch (error) {console.log("Thumbnail error: " + error)}
+  await Promise.allSettled([
+    createThumbnail(title, type),
+    createProjectDetails(description, type),
+    addTip("Modify the template as much as needed to fit your process, but we do recommend always including a thumbnail to help others find your work\n\n(P.S. Don’t forget to delete these helper stickies after.)")
+  ]).catch(reason => {
+    figma.notify("Something went wrong.")
+    console.log("Library error: " + reason)
+  })
 
   if (type == "Library"){
     let targets: FrameNode[] = [await createUse()]
@@ -961,7 +962,7 @@ async function createProjectDetails(description, type) {
 
 // This function adds a thumbnail to your first page.
 async function createThumbnail(title: string, type: string) {
-  let component = await figma.importComponentByKeyAsync("ac0b158c37de3fa8ba94d2b3801913aea262ffcb").catch(reason => {
+  let component = await figma.importComponentByKeyAsync(COMPONENT_THUMBNAIL).catch(reason => {
     figma.notify("Annotation Kit library is required for thumbnails.")
     figma.closePlugin()
   })
@@ -1390,6 +1391,16 @@ async function loadResources() {
     console.log("Font error: " + error)
     figma.closePlugin()
   }
+  //Preload some of the heavy components, so we won't have to later...
+  //(We don't load all assets because this would lock up the UI.)
+  Promise.all([
+    figma.importComponentByKeyAsync(COMPONENT_THUMBNAIL),
+    figma.importComponentByKeyAsync(COMPONENT_STICKY_AUTO),
+    figma.importComponentByKeyAsync(COMPONENT_CONTEXT_OVERVIEW),
+    figma.importComponentByKeyAsync(COMPONENT_TEMPLATE_CONTEXT),
+    figma.importComponentByKeyAsync(COMPONENT_TEMPLATE_COMPETITOR),
+    figma.importComponentByKeyAsync(COMPONENT_TEMPLATE_EXPLORATION)
+  ])
 }
 
 async function createIcons() {
