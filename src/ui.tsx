@@ -19,7 +19,6 @@ interface IItem {
 }
 
 const items = [
-  { label: 'Playground for exploration', value: 'Playground' },
   { label: 'Product spec', value: 'Product' },
   { label: 'Library', value: 'Library' },
   { label: 'Theme', value: 'Theme' }

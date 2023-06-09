@@ -1,15 +1,14 @@
 //We use the https://polished.js.org/ library to ensure color contrast in themes.
 import { rgb, hsl, readableColor } from 'polished';
 // This file holds the main code for the plugins. It has access to the *document*.
-// This plugin will open a window to prompt the user to enter project details, and
-// it will then create a document structure and thumbnail. Projects can be of
-// types: Playground (for explorations), Product (for specs), Theme, or Library.
+// This plugin will open a window to prompt the user to enter project details, and it will then create a document structure and thumbnail. Projects can be of types: Playground (for explorations), Product (for specs), Theme, or Library.
 
 // Component Keys
 // These constants are keys for common components that are used in our templates.
 const TEMPLATE_CONTENTS = "c769a6265556c091cc1d8c05762c71ecbf97314b"
 const TEMPLATE_BLOCKS = "52058e4454d829872482b8551f4918cb828880d6"
 const TEMPLATE_INFO = "d45b3005516f887724940a5a10663adcff9dc4b4"
+const COMPONENT_THUMBNAIL = "ac0b158c37de3fa8ba94d2b3801913aea262ffcb";
 const COMPONENT_TITLE = "dcc85144737cc8736a780b6e428a146ae4560606"
 const COMPONENT_BLOCK = "59a17c300d40d952e4025d551ef25f906d92f437"
 const COMPONENT_ANALYTICS = "6441ced0350d78e4edc80a5775514e7eadf07e28"
@@ -17,6 +16,17 @@ const COMPONENT_TAG_SLACK = "71da21db72cf60de2c83105045e6e1007d12312d"
 const COMPONENT_TAG_CONFULENCE = "26b3c920af05edc727905dd60bfbe80c12b03c31"
 const COMPONENT_TAG_JIRA = "df3ff6fbeac0088d43146bb28de1b8af9420a12a"
 const COMPONENT_TAG_DOCS = "ad128648b8397a62340efbe6f8577302ea576d58"
+const COMPONENT_STICKY_BIG = "d4df8b884dbe7ac182612b61cb2091b9244bdf67"
+const COMPONENT_STICKY_AUTO = "d55402669835389c69fb45347b410b8600d8d5ab"
+const COMPONENT_CONTEXT_OVERVIEW = "570f73267b59459e05f95d946262065e08115263"
+const COMPONENT_TEMPLATE_CONTEXT = "3debbe59ac381e8212b48b08a830fb608ce9de50"
+const COMPONENT_TEMPLATE_COMPETITOR = "d9cd3a6f249d15f18f41776203f7460e6efcdd52"
+const COMPONENT_TEMPLATE_EXPLORATION = "cd82358b969b8867a219d841d249685e5d4dba4c"
+const COMPONENT_TEMPLATE_CONTENT = "c74b5a975f0b949a522777e0342188a4f85bc042"
+const COMPONENT_TEMPLATE_WIP = "8d1e4952702d2f2d2a1108448f758bbea6756884"
+const COMPONENT_TEMPLATE_SHIPPED = "b56fdb22614c9d00af79696ba0df531dd8335974"
+const COMPONENT_TEMPLATE_PROTOTYPE = "ea2bd9b092c01d48b6e9e4633dcd5144551532e9"
+const COMPONENT_TEMPLATE_ARCHIVE = "136f0c6a6b8ff90a58f149c7bcc097d7db5e3e95"
 
 // Font styles & families
 // These constants are keys for common font styles that are used in our templates.
@@ -24,7 +34,6 @@ const WEB_XXXLARGE = "95e94ac41a8cc79d097111a8785d3b5976c70f99"
 // Todo: replace with font styles
 const FONT_TITLES = { family: "SF Mono", style: "Regular" }
 const FONT_BODIES = { family: "SF Pro Text", style: "Regular" }
-
 
 // These constants are common spacing values that are used in our templates.
 const PADDING_H = 40
@@ -736,6 +745,7 @@ switch(figma.command){
           // Then show the About message and option for re-running.
           figma.ui.postMessage("about")
         }
+        loadResources();
         break
       case "figjam":
         // This goes ahead and just creates a FigJam file thumbnail (and doesn't
@@ -766,7 +776,7 @@ figma.ui.onmessage = async msg => {
     // create the template pages and content.
     case "create-project":
       figma.ui.hide()
-      await loadResources()
+      // await loadResources()
       figma.root.setRelaunchData({about: "This document was formated with Ztart"})
       figma.root.setPluginData("status", "run")
       console.log("Creating project...")
@@ -778,7 +788,7 @@ figma.ui.onmessage = async msg => {
     // create the pages, color styles and content.
     case "create-theme":
       figma.ui.hide()
-      await loadResources()
+      // await loadResources()
       figma.root.setRelaunchData({update: "Regenerate accessible theme colors"})
       figma.root.setPluginData("status", "themed")
       await createTheme(msg.themeName, msg.primaryColor, msg.messageColor, msg.actionColor)
@@ -794,6 +804,8 @@ async function createProject(title, type, description) {
   } else  {
     figma.currentPage = await createPage("📖 About")
   }
+
+  //TODO Remove playground type
   switch (type) {
     case "Playground": 
       await createPage("🤔 Problem definition", "optional")
@@ -803,19 +815,21 @@ async function createProject(title, type, description) {
       await createPage("         ↪ Solution B", "optional")
       break;
     case "Product":
-      await createPage("................................................................................................")
-      await createPage("📐 Design Specs", "optional")
-      await createPage("         ↪ Ready for dev", "optional")
-      await createPage("         ↪ Shipped", "optional")
-      await createPage("................................................................................................")
-      await createPage("🕹 Prototypes", "optional")
-      await createPage("         ↪ Prototype A", "optional")
-      await createPage("................................................................................................")
-      await createPage("🏝 Explorations", "optional")
-      await createPage("         ↪ Exploration A", "optional")
-      await createPage("................................................................................................")
-      await createPage("📦 Archives", "optional")
-      await createPage("         ↪ Archive A", "optional")
+      await Promise.all([
+        createPage("🔭 Discovery ........................................................................."),
+        createPage("         ↪ Context").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTEXT) }),
+        createPage("         ↪ Competitor reference").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_COMPETITOR) }),
+        createPage("🏝 Explorations ......................................................................."),
+        createPage("         ↪ Feature A [In progress]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_EXPLORATION) }),
+        createPage("         ↪ Feature A [Content]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTENT) }),
+        createPage("📐 Specs ................................................................................."),
+        createPage("         ↪ Feature B [In review]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_WIP) }),
+        createPage("         ↪ Feature C [Shipped]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_SHIPPED) }),
+        createPage("🕹 Prototypes ........................................................................"),
+        createPage("         ↪ Prototype D").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_PROTOTYPE) }),
+        createPage("📦 Archives ............................................................................."),
+        createPage("         ↪ Archive E").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_ARCHIVE) })
+      ])
       break;
     case "Library":
       await createPage("❓ How to...")
@@ -829,13 +843,14 @@ async function createProject(title, type, description) {
       break;
   }
 
-  //Add a thumnail to the first page.
-  console.log("Adding thumbnail...")
-  try {
-      await createThumbnail(title, type).then(async () => {
-        await createProjectDetails(description, type)
-      })
-  } catch (error) {console.log("Thumbnail error: " + error)}
+  await Promise.allSettled([
+    createThumbnail(title, type),
+    createProjectDetails(description, type),
+    addTip("Modify the template as much as needed to fit your process, but we do recommend always including a thumbnail to help others find your work\n\n(P.S. Don’t forget to delete these helper stickies after.)")
+  ]).catch(reason => {
+    figma.notify("Something went wrong.")
+    console.log("Library error: " + reason)
+  })
 
   if (type == "Library"){
     let targets: FrameNode[] = [await createUse()]
@@ -929,69 +944,25 @@ async function createProject(title, type, description) {
 }
 
 async function createProjectDetails(description, type) {
-  let detailsFrame = figma.createFrame()
-  detailsFrame.name = "Project details"
-  detailsFrame.y = 340
-  detailsFrame.resizeWithoutConstraints(640, 1)
-  detailsFrame.layoutMode = "VERTICAL"
-  detailsFrame.counterAxisSizingMode = "FIXED"
-  detailsFrame.verticalPadding = PADDING_V
-  detailsFrame.horizontalPadding = PADDING_H
-  detailsFrame.itemSpacing = SPACING
-  figma.currentPage.appendChild(detailsFrame)
-
-try {
-	  detailsFrame.appendChild(createDetail("Description", description !== "" ? description : "<Enter a description here>"))
-	  let externalSection = createDetail("External Links")
-	  externalSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_CONFULENCE)).createInstance())
-	  externalSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_JIRA)).createInstance())
-	  externalSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_DOCS)).createInstance())
-	  detailsFrame.appendChild(externalSection)
-	  let slackSection = createDetail("Slack channels")
-	  slackSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_SLACK)).createInstance())
-	  slackSection.appendChild((await figma.importComponentByKeyAsync(COMPONENT_TAG_SLACK)).createInstance())
-	  detailsFrame.appendChild(slackSection)
-	  detailsFrame.appendChild(createDetail("Points of Contact", "Design - <link Slack profile here>\nProduct - <link Slack profile here>\nEngineering - <link Slack profile here>"))
-} catch (error) {
-	figma.notify("Annotation Kit library is required for project details.")
-  console.log("Library error: " + error)
-}
-
-  // Frame for wrapping the list of page examples.
-  let listFrame = figma.createFrame()
-  listFrame.name = "Add other pages, as needed..."
-  listFrame.y = detailsFrame.y + detailsFrame.height + SPACING
-  listFrame.resizeWithoutConstraints(640, 1)
-  listFrame.layoutMode = "VERTICAL"
-  listFrame.counterAxisSizingMode = "FIXED"
-  listFrame.verticalPadding = PADDING_V
-  listFrame.horizontalPadding = PADDING_H
-  listFrame.itemSpacing = 8
-  figma.currentPage.appendChild(listFrame)
-
-  // Not all projects need a prototype, shipped it/released, or research page.
-  // However in order to make adding one of these pages easily, we add some
-  // text to our scratch page so we can copy/paste them with the proper emoji.
-  switch (type) {
-    case "Playground":
-      listFrame.appendChild(createPageExample("⏳ History"))
-      listFrame.appendChild(createPageExample("✅ Next steps"))
-    break
-    case "Product":
-      listFrame.appendChild(createPageExample("💅🏽 Styles"))
-      listFrame.appendChild(createPageExample("⚙️ Components"))
-    break
-    case "Library":
-      listFrame.appendChild(createPageExample("💅🏽 Styles"))
-      listFrame.appendChild(createPageExample("🚀 Roadmap"))
-    break
+  try {
+      let overview = (await figma.importComponentByKeyAsync(COMPONENT_CONTEXT_OVERVIEW)).createInstance()
+      overview.y = 360
+      overview.resize(640, overview.height)
+    
+      let descriptionNotes = overview.findOne(node => node.name == "Notes" && node.type == "TEXT") as TextNode
+      descriptionNotes.characters = description
+    
+      figma.currentPage.appendChild(overview)
+  } catch (error) {
+    figma.notify("Annotation Kit library is required for project details.")
+    console.log("Library error: " + error)
   }
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 }
 
 // This function adds a thumbnail to your first page.
 async function createThumbnail(title: string, type: string) {
-  let component = await figma.importComponentByKeyAsync("ac0b158c37de3fa8ba94d2b3801913aea262ffcb").catch(reason => {
+  let component = await figma.importComponentByKeyAsync(COMPONENT_THUMBNAIL).catch(reason => {
     figma.notify("Annotation Kit library is required for thumbnails.")
     figma.closePlugin()
   })
@@ -1007,6 +978,14 @@ async function createThumbnail(title: string, type: string) {
     thumbnailFrame.appendChild(thumbnail)
     figma.currentPage.appendChild(thumbnailFrame)
 
+    thumbnail.setProperties({
+      "Show project type#3022:9": false,
+      "Show summary#3022:0": true,
+      "Show point of contact#3022:3": true,
+      "Show date last active#3022:6": true,
+      "Show image#2502:3": true
+    })
+
     let label = thumbnail.findOne(node => node.name == "File Name") as TextNode
     await figma.loadFontAsync(label.fontName as FontName).then(() => {
       if (title !== ""){
@@ -1018,13 +997,33 @@ async function createThumbnail(title: string, type: string) {
 
     let badge = thumbnail.findOne(node => node.name.includes("Badge") && node.type == "INSTANCE") as InstanceNode
     switch (type) {
+      case "Playground":
+        thumbnail.setProperties({
+          "Show project type#3022:9": true
+        })
+        badge.setProperties({"Project type": "Playground"})
+        break
       case "Product":
         badge.setProperties({"Project type": "Product"})
         break
       case "Library":
+        thumbnail.setProperties({
+          "Show project type#3022:9": true,
+          "Show summary#3022:0": true,
+          "Show point of contact#3022:3": false,
+          "Show date last active#3022:6": false,
+          "Show image#2502:3": true
+        })
         badge.setProperties({"Project type": "Library"})
         break
       case "Theme":
+        thumbnail.setProperties({
+          "Show project type#3022:9": true,
+          "Show summary#3022:0": false,
+          "Show point of contact#3022:3": false,
+          "Show date last active#3022:6": false,
+          "Show image#2502:3": false
+        })
         badge.setProperties({"Project type": "Theme"})
         break
       case "FigJam":
@@ -1051,40 +1050,21 @@ async function createPage(title: string, optional?: Optional) {
   return page
 }
 
-// Adds a section to your details frame.
-function createDetail(title: string, body?: string) {
-  let detailFrame = figma.createFrame()
-  detailFrame.name = title
-  detailFrame.layoutMode = "VERTICAL"
-  detailFrame.counterAxisSizingMode = "AUTO"
-  detailFrame.layoutAlign = "STRETCH"
-  detailFrame.itemSpacing = 8
-
-  let titleText = figma.createText()
-  titleText.fontName = FONT_TITLES
-  titleText.fontSize = 17
-  titleText.characters = title
-  titleText.layoutAlign = "STRETCH"
-  detailFrame.appendChild(titleText)
-  if(body){
-    let bodyText = figma.createText()
-    bodyText.fontName = FONT_BODIES
-    bodyText.fontSize = 14
-    bodyText.characters = body
-    bodyText.layoutAlign = "STRETCH"
-    detailFrame.appendChild(bodyText)
+async function createFromTemplate(targetPage: PageNode, templateKey) {
+  console.log("Building... " + targetPage.name);
+  
+  try {
+      let template = (await figma.importComponentByKeyAsync(templateKey)).createInstance().detachInstance()
+      template.children.forEach(child => {
+        child.x = child.x - 312
+        child.y = child.y - 352
+        targetPage.appendChild(child)
+      })
+      template.remove()
+  } catch (error) {
+    figma.notify("Process Kit library is required for page contents.")
+    console.log("Library error: " + error)
   }
-
-  return detailFrame
-}
-
-// Adds an example to your list frame.
-function createPageExample(text: string) {
-  let linkLabel = figma.createText()
-  linkLabel.fontName = FONT_BODIES
-  linkLabel.fontSize = 14
-  linkLabel.characters = text
-  return linkLabel
 }
 
 async function createHowTo(targets) {
@@ -1099,7 +1079,6 @@ async function createHowTo(targets) {
 
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.children);
 }
-
 
 async function createUse() {
   let usePage = figma.root.children.find(node => node.name == "         ↪ Use this library")
@@ -1168,7 +1147,7 @@ async function createSlideFrame(id: string, supertitleText: string, titleText?: 
   figma.currentPage.insertChild(figma.currentPage.children.length, frame1)
 
   if (instructionText){
-    let stickie = await (await figma.importComponentByKeyAsync("d4df8b884dbe7ac182612b61cb2091b9244bdf67")).createInstance()
+    let stickie = await (await figma.importComponentByKeyAsync(COMPONENT_STICKY_BIG)).createInstance()
     stickie.y = frame1.y
     stickie.x = frame1.x - 40 - 272
     let note = stickie.findChild(node => node.name === "Note") as TextNode
@@ -1412,6 +1391,16 @@ async function loadResources() {
     console.log("Font error: " + error)
     figma.closePlugin()
   }
+  //Preload some of the heavy components, so we won't have to later...
+  //(We don't load all assets because this would lock up the UI.)
+  Promise.all([
+    figma.importComponentByKeyAsync(COMPONENT_THUMBNAIL),
+    figma.importComponentByKeyAsync(COMPONENT_STICKY_AUTO),
+    figma.importComponentByKeyAsync(COMPONENT_CONTEXT_OVERVIEW),
+    figma.importComponentByKeyAsync(COMPONENT_TEMPLATE_CONTEXT),
+    figma.importComponentByKeyAsync(COMPONENT_TEMPLATE_COMPETITOR),
+    figma.importComponentByKeyAsync(COMPONENT_TEMPLATE_EXPLORATION)
+  ])
 }
 
 async function createIcons() {
@@ -1766,7 +1755,8 @@ function mixPaint(color: RGB): Paint {
 }
 
 async function addTip(tipText: string) {
-  let stickie = await (await figma.importComponentByKeyAsync("d4df8b884dbe7ac182612b61cb2091b9244bdf67")).createInstance()
+  let stickie = await (await figma.importComponentByKeyAsync(COMPONENT_STICKY_AUTO)).createInstance()
+  stickie.resize(272, stickie.height)
   stickie.y = 0
   stickie.x = 0 - 272 - 40
   let note = stickie.findChild(node => node.name === "Note") as TextNode
