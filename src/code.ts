@@ -1057,7 +1057,7 @@ async function createFromTemplate(targetPage: PageNode, templateKey) {
       let template = (await figma.importComponentByKeyAsync(templateKey)).createInstance().detachInstance()
       template.children.forEach(child => {
         child.x = child.x - 312
-        child.y = child.y - 352
+        child.y = child.y - 502
         targetPage.appendChild(child)
       })
       template.remove()
