@@ -816,19 +816,19 @@ async function createProject(title, type, description) {
       break;
     case "Product":
       await Promise.all([
-        createPage("🔭 Discovery ........................................................................."),
-        createPage("         ↪ Context").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTEXT) }),
-        createPage("         ↪ Competitor reference").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_COMPETITOR) }),
-        createPage("🏝 Explorations ......................................................................."),
-        createPage("         ↪ Feature A [In progress]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_EXPLORATION) }),
-        createPage("         ↪ Feature A [Content]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTENT) }),
-        createPage("📐 Specs ................................................................................."),
-        createPage("         ↪ Feature B [In review]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_WIP) }),
-        createPage("         ↪ Feature C [Shipped]").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_SHIPPED) }),
-        createPage("🕹 Prototypes ........................................................................"),
-        createPage("         ↪ Prototype D").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_PROTOTYPE) }),
-        createPage("📦 Archives ............................................................................."),
-        createPage("         ↪ Archive E").then(page => { createFromTemplate(page, COMPONENT_TEMPLATE_ARCHIVE) })
+        await createPage("🔭 Discovery ........................................................................."),
+        await createPage("         ↪ Context").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTEXT) }),
+        await createPage("         ↪ Competitor reference").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_COMPETITOR) }),
+        await createPage("🏝 Explorations ......................................................................."),
+        await createPage("         ↪ Feature A [In progress]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_EXPLORATION) }),
+        await createPage("         ↪ Feature A [Content]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_CONTENT) }),
+        await createPage("📐 Specs ................................................................................."),
+        await createPage("         ↪ Feature B [In review]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_WIP) }),
+        await createPage("         ↪ Feature C [Shipped]").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_SHIPPED) }),
+        await createPage("🕹 Prototypes ........................................................................"),
+        await createPage("         ↪ Prototype D").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_PROTOTYPE) }),
+        await createPage("📦 Archives ............................................................................."),
+        await createPage("         ↪ Archive E").then(async page => { createFromTemplate(page, COMPONENT_TEMPLATE_ARCHIVE) })
       ])
       break;
     case "Library":
