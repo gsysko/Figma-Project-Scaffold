@@ -68,10 +68,6 @@ const WHITE = {
   }
 }
 
-// This variable is used to generate example text in a light/dark theme template.
-var LIGHT_TEXT_COLOR_STYLE
-var DARK_TEXT_COLOR_STYLE
-
 // This parameter type is used to indicate (to functions) that we are generating a
 // light or dark theme.
 type ColorMode = "dark" | "light"
@@ -1351,7 +1347,7 @@ async function createStyle(themeName: string, mode: ColorMode, colorName: string
   exampleText.fontName = FONT_TITLES
   exampleText.fontSize = 48
   exampleText.characters = colorName
-  exampleText.fillStyleId = (mode == "light" ? LIGHT_TEXT_COLOR_STYLE.id : DARK_TEXT_COLOR_STYLE.id)
+  exampleText.fills = (mode == "light" ? [BLACK] : [WHITE])
   exampleFrame.appendChild(swatchFrame)
   exampleFrame.appendChild(exampleText)
   exampleTarget.appendChild(exampleFrame)
@@ -1382,10 +1378,6 @@ async function loadResources() {
   try {
     await figma.loadFontAsync(FONT_TITLES)
     await figma.loadFontAsync(FONT_BODIES)
-  
-    console.log("Loading text colors...")
-    LIGHT_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("f207233833aea62e2f0163bb4b6c6ed602459ba1")
-    DARK_TEXT_COLOR_STYLE = await figma.importStyleByKeyAsync("5638e43c82613c7f15c60e3e8e9496c17763ae49")
   } catch (error) {
     figma.notify("Fonts missing. Contact support.")
     console.log("Font error: " + error)
