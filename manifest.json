@@ -3,6 +3,7 @@
   "id": "969955251383800980",
   "api": "1.0.0",
   "editorType": ["figma", "figjam"],
+  "documentAccess": "dynamic-page",
   "main": "dist/code.js",
   "ui": "dist/ui.html",
   "relaunchButtons": [
